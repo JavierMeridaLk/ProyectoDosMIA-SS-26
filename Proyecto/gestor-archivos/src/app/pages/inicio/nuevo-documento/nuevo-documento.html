@@ -1,0 +1,63 @@
+<div class="fondo" (click)="cerrar.emit()">
+  <section
+    class="dialogo"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titulo-nuevo"
+    (click)="$event.stopPropagation()"
+  >
+    <header>
+      <h2 id="titulo-nuevo">Nuevo documento</h2>
+      <button type="button" class="cerrar" aria-label="Cerrar" (click)="cerrar.emit()">
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <form [formGroup]="form" (ngSubmit)="crear()" novalidate>
+      @if (error()) {
+        <div class="alerta" role="alert">
+          <app-icono nombre="alerta" [tamano]="16" />
+          <span>{{ error() }}</span>
+        </div>
+      }
+
+      <div class="campo">
+        <label for="nuevo-nombre">Nombre</label>
+        <div class="control" [class.invalido]="form.controls.nombre.invalid && form.controls.nombre.touched">
+          <input
+            #campoNombre
+            id="nuevo-nombre"
+            formControlName="nombre"
+            placeholder="Nombre del documento"
+            autocomplete="off"
+          />
+          <span class="sufijo">.{{ form.controls.extension.value }}</span>
+        </div>
+        @if (form.controls.nombre.invalid && form.controls.nombre.touched) {
+          <small class="mensaje">Escribe un nombre válido (sin / ni \)</small>
+        }
+      </div>
+
+      <fieldset class="campo">
+        <legend>Tipo</legend>
+        <div class="tipos">
+          <label [class.activo]="form.controls.extension.value === 'txt'">
+            <input type="radio" formControlName="extension" value="txt" />
+            Texto (.txt)
+          </label>
+          <label [class.activo]="form.controls.extension.value === 'md'">
+            <input type="radio" formControlName="extension" value="md" />
+            Markdown (.md)
+          </label>
+        </div>
+      </fieldset>
+
+      <footer>
+        <button type="button" class="boton boton-borde" (click)="cerrar.emit()">Cancelar</button>
+        <button type="submit" class="boton boton-navy" [disabled]="cargando()">
+          {{ cargando() ? 'Creando…' : 'Crear' }}
+        </button>
+      </footer>
+    </form>
+  </section>
+</div>

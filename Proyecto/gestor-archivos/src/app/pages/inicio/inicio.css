@@ -320,6 +320,85 @@ button.avatar[aria-expanded='true'] {
   color: var(--texto-suave);
 }
 
+.boton:disabled {
+  opacity: 0.7;
+}
+
+.alerta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--fondo-error);
+  color: var(--error);
+  font-size: 0.8rem;
+}
+
+.alerta button {
+  display: inline-flex;
+  margin-left: auto;
+  padding: 2px;
+  border: 0;
+  background: none;
+  color: inherit;
+}
+
+/* Tarjetas de documentos */
+.tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 20px 14px 16px;
+  background: var(--blanco);
+  border: 1px solid #ece4de;
+  border-radius: 14px;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.tarjeta:hover {
+  border-color: var(--sky);
+  box-shadow: 0 6px 18px rgb(47 65 86 / 10%);
+}
+
+.tarjeta-icono {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 6px;
+  border-radius: 12px;
+  background: var(--beige);
+  color: var(--teal);
+}
+
+.tarjeta-nombre {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.tarjeta small {
+  font-size: 0.72rem;
+  color: var(--texto-suave);
+}
+
+.ext {
+  text-transform: uppercase;
+}
+
 .vacio {
   display: flex;
   flex-direction: column;

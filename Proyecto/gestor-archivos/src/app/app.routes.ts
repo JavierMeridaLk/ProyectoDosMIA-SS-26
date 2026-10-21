@@ -16,5 +16,15 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/inicio/inicio').then((m) => m.Inicio),
     title: 'Mi Unidad · Gestor de Archivos',
   },
-  { path: '**', redirectTo: 'inicio' },
+  {
+    path: 'documentos/:id',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/editor/editor').then((m) => m.Editor),
+    title: 'Editor · Gestor de Archivos',
+  },
+  {
+    path: '**',
+    loadComponent: () => import('./pages/no-encontrada/no-encontrada').then((m) => m.NoEncontrada),
+    title: 'Página no encontrada · Gestor de Archivos',
+  },
 ];

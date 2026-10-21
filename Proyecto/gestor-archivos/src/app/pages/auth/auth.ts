@@ -11,6 +11,7 @@ import {
 import { Router } from '@angular/router';
 
 import { AuthService } from '../../core/services/auth.service';
+import { mensajeDeError } from '../../core/mensaje-error';
 import { Icono } from '../../shared/icono/icono';
 
 type Pestana = 'login' | 'registro';
@@ -87,11 +88,7 @@ export class Auth {
     peticion.subscribe({
       next: () => this.router.navigate(['/inicio']),
       error: (err: HttpErrorResponse) => {
-        this.error.set(
-          err.status === 0
-            ? 'No se pudo conectar con el servidor'
-            : (err.error?.mensaje ?? 'Ocurrió un error inesperado'),
-        );
+        this.error.set(mensajeDeError(err));
         this.cargando.set(false);
       },
     });

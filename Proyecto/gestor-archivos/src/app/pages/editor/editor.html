@@ -1,0 +1,67 @@
+<header class="barra">
+  <button type="button" class="icono-boton" aria-label="Volver a Mi Unidad" (click)="volver()">
+    <app-icono nombre="volver" />
+  </button>
+
+  @if (documento(); as doc) {
+    <div class="titulo">
+      <app-icono nombre="archivo" />
+      <strong [title]="doc.nombre + '.' + doc.extension">{{ doc.nombre }}.{{ doc.extension }}</strong>
+      <small [class.pendiente]="sinGuardar()">
+        {{ guardando() ? 'Guardando…' : sinGuardar() ? 'Cambios sin guardar' : 'Guardado' }}
+      </small>
+    </div>
+
+    <div class="acciones">
+      <button type="button" class="boton boton-borde" (click)="descargar()">
+        <app-icono nombre="descargar" [tamano]="16" /> Descargar
+      </button>
+      <button
+        type="button"
+        class="boton boton-navy"
+        title="Guardar (Ctrl+S)"
+        [disabled]="!sinGuardar() || guardando()"
+        (click)="guardar()"
+      >
+        <app-icono nombre="guardar" [tamano]="16" /> Guardar
+      </button>
+    </div>
+  }
+</header>
+
+@if (error()) {
+  <div class="alerta" role="alert">
+    <app-icono nombre="alerta" [tamano]="16" />
+    <span>{{ error() }}</span>
+  </div>
+}
+
+@if (cargando()) {
+  <p class="cargando">Cargando documento…</p>
+} @else if (documento(); as doc) {
+  <div class="editor">
+    <div class="numeros" #numeros aria-hidden="true">
+      @for (n of numerosDeLinea(); track n) {
+        <div [class.actual]="n === linea()">{{ n }}</div>
+      }
+    </div>
+    <textarea
+      #area
+      [value]="textoInicial()"
+      (input)="alEscribir(area)"
+      (keydown)="alPresionarTecla($event, area)"
+      (keyup)="actualizarCursor(area)"
+      (mouseup)="actualizarCursor(area)"
+      (focus)="actualizarCursor(area)"
+      (scroll)="numeros.scrollTop = area.scrollTop"
+      wrap="off"
+      spellcheck="false"
+      aria-label="Contenido del documento"
+    ></textarea>
+  </div>
+
+  <footer class="estado">
+    <span>{{ doc.extension === 'md' ? 'Markdown' : 'Texto plano' }}</span>
+    <span>Ln {{ linea() }}, Col {{ columna() }}</span>
+  </footer>
+}

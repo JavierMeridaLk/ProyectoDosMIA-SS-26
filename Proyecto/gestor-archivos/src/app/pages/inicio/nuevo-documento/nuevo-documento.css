@@ -1,0 +1,186 @@
+.fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgb(47 65 86 / 45%);
+}
+
+.dialogo {
+  width: 100%;
+  max-width: 400px;
+  background: var(--blanco);
+  border-radius: 16px;
+  box-shadow: var(--sombra);
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px 0;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.cerrar {
+  display: inline-flex;
+  padding: 4px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--texto-suave);
+}
+
+.cerrar:hover {
+  background: var(--beige);
+  color: var(--navy);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px 20px 20px;
+}
+
+.campo {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.campo label[for],
+.campo legend {
+  display: block;
+  margin-bottom: 6px;
+  padding: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  background: var(--fondo-input);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+}
+
+.control:focus-within {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgb(86 124 141 / 18%);
+}
+
+.control.invalido {
+  border-color: var(--error);
+}
+
+.control input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: 10px 0;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.sufijo {
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+.mensaje {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.72rem;
+  color: var(--error);
+}
+
+.tipos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.tipos label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+  cursor: pointer;
+}
+
+.tipos label.activo {
+  border-color: var(--navy);
+  background: var(--beige);
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.tipos label:has(input:focus-visible) {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+.tipos input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.alerta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--fondo-error);
+  color: var(--error);
+  font-size: 0.8rem;
+}
+
+footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.boton {
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.boton-navy {
+  background: var(--navy);
+  color: var(--blanco);
+}
+
+.boton-navy:disabled {
+  opacity: 0.7;
+}
+
+.boton-borde {
+  background: var(--blanco);
+  border-color: var(--borde);
+}
+
+.boton-borde:hover {
+  background: var(--beige);
+}

@@ -6,12 +6,14 @@ import cors from "cors";
 import { conectarDB } from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import usuariosRoutes from "./routes/usuarios.routes.js";
+import documentosRoutes from "./routes/documentos.routes.js";
 
 //Instancia dse nuestra aplicacion
 const app = express()
 
 app.use(cors({ origin: "http://localhost:4200" }))
-app.use(express.json())
+//Limite mayor al de por defecto (100kb) para poder guardar documentos desde el editor
+app.use(express.json({ limit: "6mb" }))
 
 app.get("/", (req, res) => {
     res.send("Hola mundo desde express")
@@ -19,6 +21,13 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes)
 app.use("/api/usuarios", usuariosRoutes)
+app.use("/api/documentos", documentosRoutes)
+
+//Cualquier error no controlado responde en JSON
+app.use((error, req, res, next) => {
+    console.error(error)
+    res.status(500).json({ mensaje: "Error interno del servidor" })
+})
 
 const PORT = process.env.PORT || 3001
 

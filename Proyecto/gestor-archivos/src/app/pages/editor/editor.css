@@ -1,0 +1,162 @@
+:host {
+  --alto-linea: 22px;
+  --relleno: 12px;
+
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  background: var(--blanco);
+}
+
+/* Barra superior */
+.barra {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #ece4de;
+}
+
+.icono-boton {
+  display: inline-flex;
+  padding: 6px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--texto-suave);
+}
+
+.icono-boton:hover {
+  background: var(--beige);
+  color: var(--navy);
+}
+
+.titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--texto-suave);
+}
+
+.titulo strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--navy);
+}
+
+.titulo small {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+}
+
+.titulo small.pendiente {
+  color: #b7791f;
+}
+
+.acciones {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.boton-navy {
+  background: var(--navy);
+  color: var(--blanco);
+}
+
+.boton-navy:disabled {
+  opacity: 0.5;
+}
+
+.boton-borde {
+  background: var(--blanco);
+  border-color: var(--borde);
+}
+
+.boton-borde:hover {
+  background: var(--beige);
+}
+
+.alerta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 20px 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--fondo-error);
+  color: var(--error);
+  font-size: 0.8rem;
+}
+
+.cargando {
+  padding: 24px;
+  color: var(--texto-suave);
+}
+
+/* Editor: numeros de linea + area de texto con la misma altura de linea */
+.editor {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  font-family: ui-monospace, 'Cascadia Code', 'Fira Code', Consolas, monospace;
+  font-size: 14px;
+  line-height: var(--alto-linea);
+}
+
+.numeros {
+  flex-shrink: 0;
+  min-width: 52px;
+  padding: var(--relleno) 12px 60px;
+  overflow: hidden;
+  background: var(--beige);
+  border-right: 1px solid #e6ddd6;
+  color: #9aabb8;
+  text-align: right;
+  user-select: none;
+}
+
+.numeros .actual {
+  color: var(--navy);
+  font-weight: 600;
+}
+
+textarea {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: var(--relleno) 16px;
+  border: 0;
+  outline: none;
+  resize: none;
+  background: var(--blanco);
+  color: var(--navy);
+  font: inherit;
+  line-height: inherit;
+  white-space: pre;
+  overflow: auto;
+  tab-size: 4;
+}
+
+/* Barra de estado */
+.estado {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 16px;
+  background: var(--navy);
+  color: var(--sky);
+  font-size: 0.75rem;
+}

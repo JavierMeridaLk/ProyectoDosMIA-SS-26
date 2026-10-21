@@ -1,0 +1,18 @@
+<main class="fondo">
+  <section class="tarjeta">
+    <img src="logo.svg" alt="" width="64" height="64" />
+    <p class="codigo">404</p>
+    <h1>Página no encontrada</h1>
+    <p class="texto">La ruta que buscas no existe o fue movida.</p>
+
+    @if (auth.autenticado()) {
+      <a routerLink="/inicio" class="boton">
+        <app-icono nombre="volver" [tamano]="16" /> Volver a Mi Unidad
+      </a>
+    } @else {
+      <a routerLink="/login" class="boton">
+        <app-icono nombre="volver" [tamano]="16" /> Ir a iniciar sesión
+      </a>
+    }
+  </section>
+</main>
