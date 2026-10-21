@@ -1,0 +1,110 @@
+<header class="barra">
+  <div class="marca">
+    <img src="logo.svg" alt="" width="30" height="30" />
+    <span>Gestor de Archivos</span>
+  </div>
+
+  <label class="busqueda">
+    <app-icono nombre="buscar" [tamano]="16" />
+    <input type="search" placeholder="Buscar archivos, documentos o carpetas..." />
+  </label>
+
+  <div class="acciones">
+    <div class="perfil">
+      <button
+        type="button"
+        class="avatar"
+        aria-label="Ver información de la cuenta"
+        [attr.aria-expanded]="menuAbierto()"
+        (click)="menuAbierto.set(!menuAbierto())"
+      >
+        {{ iniciales() }}
+      </button>
+
+      @if (menuAbierto() && auth.usuario(); as usuario) {
+        <div class="perfil-panel" role="dialog" aria-label="Información de la cuenta">
+          <div class="perfil-cabecera">
+            <span class="avatar avatar-grande">{{ iniciales() }}</span>
+            <div>
+              <strong>{{ usuario.user }}</strong>
+              <small>{{ usuario.correo }}</small>
+            </div>
+          </div>
+          <dl>
+            <div>
+              <dt>Rol</dt>
+              <dd>{{ usuario.rol === 'ADMIN' ? 'Administrador' : 'Usuario' }}</dd>
+            </div>
+            <div>
+              <dt>Espacio asignado</dt>
+              <dd>{{ usuario.almacenamiento | bytes }}</dd>
+            </div>
+            <div>
+              <dt>Miembro desde</dt>
+              <dd>{{ usuario.fechaCreacion | date: 'dd/MM/yyyy' }}</dd>
+            </div>
+          </dl>
+        </div>
+      }
+    </div>
+    <button
+      type="button"
+      class="icono-boton"
+      aria-label="Cerrar sesión"
+      title="Cerrar sesión"
+      (click)="auth.cerrarSesion()"
+    >
+      <app-icono nombre="salir" />
+    </button>
+  </div>
+</header>
+
+<div class="contenedor">
+  <aside class="lateral">
+    <div class="crear">
+      <button type="button" class="boton boton-navy">
+        <app-icono nombre="carpetaMas" [tamano]="16" /> Nueva Carpeta
+      </button>
+      <button type="button" class="boton boton-borde">
+        <app-icono nombre="documentoMas" [tamano]="16" /> Nuevo Documento
+      </button>
+      <button type="button" class="boton boton-suave">
+        <app-icono nombre="subir" [tamano]="16" /> Subir Archivo
+      </button>
+    </div>
+
+    <nav class="menu">
+      <a class="activo"><app-icono nombre="disco" /> Mi Unidad</a>
+      <a><app-icono nombre="usuarios" /> Compartidos conmigo</a>
+      <a><app-icono nombre="papelera" /> Papelera</a>
+    </nav>
+
+    <div class="almacenamiento">
+      <div class="almacenamiento-titulo">
+        <span><app-icono nombre="nube" [tamano]="14" /> Almacenamiento</span>
+        <strong>{{ porcentajeUsado() }}%</strong>
+      </div>
+      <div
+        class="progreso"
+        role="progressbar"
+        [attr.aria-valuenow]="porcentajeUsado()"
+        aria-valuemin="0"
+        aria-valuemax="100"
+      >
+        <div [style.width.%]="porcentajeUsado()"></div>
+      </div>
+      <small>{{ usado() | bytes }} de {{ auth.usuario()?.almacenamiento | bytes }} usados</small>
+    </div>
+  </aside>
+
+  <main class="contenido">
+    <div class="contenido-cabecera">
+      <h2>Mi Unidad</h2>
+    </div>
+
+    <div class="vacio">
+      <app-icono nombre="carpeta" [tamano]="44" />
+      <h3>Bienvenido, {{ auth.usuario()?.user }}</h3>
+    </div>
+  </main>
+</div>

@@ -1,1 +1,51 @@
-/* You can add global styles to this file, and also import other style files */
+/* Paleta de colores del Gestor de Archivos */
+:root {
+  --navy: #2f4156;
+  --teal: #567c8d;
+  --sky: #c8d9e6;
+  --beige: #f5efeb;
+  --blanco: #ffffff;
+
+  --texto: var(--navy);
+  --texto-suave: var(--teal);
+  --borde: var(--sky);
+  --fondo-input: #fbf9f7;
+  --error: #b4443c;
+  --fondo-error: #fbecea;
+
+  --radio: 12px;
+  --sombra: 0 10px 30px rgb(47 65 86 / 18%);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--texto);
+  background: var(--beige);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}

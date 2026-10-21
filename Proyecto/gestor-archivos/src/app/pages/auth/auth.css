@@ -1,0 +1,186 @@
+.fondo {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  background:
+    radial-gradient(circle at 20% 15%, rgb(200 217 230 / 25%), transparent 45%),
+    linear-gradient(160deg, #4a6274 0%, var(--navy) 100%);
+}
+
+.tarjeta {
+  width: 100%;
+  max-width: 380px;
+  background: var(--blanco);
+  border-radius: 16px;
+  box-shadow: var(--sombra);
+  overflow: hidden;
+}
+
+/* Cabecera con logo */
+.cabecera {
+  background: var(--beige);
+  text-align: center;
+  padding: 28px 24px 22px;
+}
+
+.cabecera img {
+  display: block;
+  margin: 0 auto 10px;
+}
+
+.cabecera h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+/* Pestaña */
+.pestanas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid #ece4de;
+  border-bottom: 1px solid #ece4de;
+  background: #faf7f5;
+}
+
+.pestanas button {
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.pestanas button:hover {
+  color: var(--navy);
+}
+
+.pestanas button.activa {
+  background: var(--blanco);
+  color: var(--navy);
+  border-bottom-color: var(--navy);
+}
+
+/* Formulario */
+.cuerpo {
+  padding: 20px 20px 22px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.campo label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  background: var(--fondo-input);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  color: var(--texto-suave);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.control:focus-within {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgb(86 124 141 / 18%);
+}
+
+.control.invalido {
+  border-color: var(--error);
+}
+
+.control input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: 10px 0;
+  font-size: 0.85rem;
+  color: var(--navy);
+  outline: none;
+}
+
+.control input::placeholder {
+  color: #9aabb8;
+}
+
+.ver {
+  display: inline-flex;
+  padding: 4px;
+  border: 0;
+  background: none;
+  color: var(--texto-suave);
+  border-radius: 4px;
+}
+
+.ver:hover {
+  color: var(--navy);
+}
+
+.mensaje {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.72rem;
+  color: var(--error);
+}
+
+.alerta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--fondo-error);
+  color: var(--error);
+  font-size: 0.8rem;
+}
+
+/* Botones */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 11px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--blanco);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: filter 0.15s, opacity 0.15s;
+}
+
+.boton:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+
+.boton:disabled {
+  opacity: 0.7;
+}
+
+.boton-navy {
+  background: var(--navy);
+}
+
+.boton-teal {
+  background: var(--teal);
+}

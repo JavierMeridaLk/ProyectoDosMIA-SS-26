@@ -1,0 +1,179 @@
+<main class="fondo">
+  <section class="tarjeta">
+    <header class="cabecera">
+      <img src="logo.svg" alt="" width="56" height="56" />
+      <h1>Gestor de Archivos</h1>
+    </header>
+
+    <div class="pestanas" role="tablist">
+      <button
+        type="button"
+        role="tab"
+        [class.activa]="pestana() === 'login'"
+        [attr.aria-selected]="pestana() === 'login'"
+        (click)="cambiarPestana('login')"
+      >
+        Iniciar Sesión
+      </button>
+      <button
+        type="button"
+        role="tab"
+        [class.activa]="pestana() === 'registro'"
+        [attr.aria-selected]="pestana() === 'registro'"
+        (click)="cambiarPestana('registro')"
+      >
+        Registrarse
+      </button>
+    </div>
+
+    <div class="cuerpo">
+      @if (error()) {
+        <div class="alerta" role="alert">
+          <app-icono nombre="alerta" [tamano]="16" />
+          <span>{{ error() }}</span>
+        </div>
+      }
+
+      @if (pestana() === 'login') {
+        <form [formGroup]="formLogin" (ngSubmit)="iniciarSesion()" novalidate>
+          <div class="campo">
+            <label for="login-user">Usuario</label>
+            <div class="control" [class.invalido]="invalido(formLogin, 'user')">
+              <app-icono nombre="usuario" />
+              <input
+                id="login-user"
+                formControlName="user"
+                autocomplete="username"
+                placeholder="Tu nombre de usuario"
+              />
+            </div>
+            @if (invalido(formLogin, 'user')) {
+              <small class="mensaje">Ingresa tu usuario</small>
+            }
+          </div>
+
+          <div class="campo">
+            <label for="login-contrasena">Contraseña</label>
+            <div class="control" [class.invalido]="invalido(formLogin, 'contrasena')">
+              <app-icono nombre="candado" />
+              <input
+                id="login-contrasena"
+                formControlName="contrasena"
+                [type]="verContrasena() ? 'text' : 'password'"
+                autocomplete="current-password"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                class="ver"
+                (click)="verContrasena.set(!verContrasena())"
+                [attr.aria-label]="verContrasena() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              >
+                <app-icono [nombre]="verContrasena() ? 'ojoCerrado' : 'ojo'" [tamano]="16" />
+              </button>
+            </div>
+            @if (invalido(formLogin, 'contrasena')) {
+              <small class="mensaje">Ingresa tu contraseña</small>
+            }
+          </div>
+
+          <button type="submit" class="boton boton-navy" [disabled]="cargando()">
+            {{ cargando() ? 'Ingresando…' : 'Ingresar' }}
+            <app-icono nombre="flecha" [tamano]="16" />
+          </button>
+        </form>
+      } @else {
+        <form [formGroup]="formRegistro" (ngSubmit)="registrarse()" novalidate>
+          <div class="campo">
+            <label for="reg-correo">Correo electrónico</label>
+            <div class="control" [class.invalido]="invalido(formRegistro, 'correo')">
+              <app-icono nombre="correo" />
+              <input
+                id="reg-correo"
+                type="email"
+                formControlName="correo"
+                autocomplete="email"
+                placeholder="Correo de ejemplo"
+              />
+            </div>
+            @if (invalido(formRegistro, 'correo')) {
+              <small class="mensaje">Ingresa un correo válido</small>
+            }
+          </div>
+
+          <div class="campo">
+            <label for="reg-user">Usuario</label>
+            <div class="control" [class.invalido]="invalido(formRegistro, 'user')">
+              <app-icono nombre="usuario" />
+              <input
+                id="reg-user"
+                formControlName="user"
+                autocomplete="username"
+                placeholder="Usuario de ejemplo"
+              />
+            </div>
+            @if (invalido(formRegistro, 'user')) {
+              <small class="mensaje">
+                Mínimo 3 caracteres: letras, números, punto, guion o guion bajo
+              </small>
+            }
+          </div>
+
+          <div class="campo">
+            <label for="reg-contrasena">Contraseña</label>
+            <div class="control" [class.invalido]="invalido(formRegistro, 'contrasena')">
+              <app-icono nombre="candado" />
+              <input
+                id="reg-contrasena"
+                formControlName="contrasena"
+                [type]="verContrasena() ? 'text' : 'password'"
+                autocomplete="new-password"
+                placeholder="Mínimo 4 caracteres"
+              />
+              <button
+                type="button"
+                class="ver"
+                (click)="verContrasena.set(!verContrasena())"
+                [attr.aria-label]="verContrasena() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              >
+                <app-icono [nombre]="verContrasena() ? 'ojoCerrado' : 'ojo'" [tamano]="16" />
+              </button>
+            </div>
+            @if (invalido(formRegistro, 'contrasena')) {
+              <small class="mensaje">La contraseña debe tener al menos 4 caracteres</small>
+            }
+          </div>
+
+          <div class="campo">
+            <label for="reg-confirmacion">Confirmar contraseña</label>
+            @let noCoinciden =
+              formRegistro.controls.confirmacion.touched && formRegistro.hasError('noCoinciden');
+            <div
+              class="control"
+              [class.invalido]="invalido(formRegistro, 'confirmacion') || noCoinciden"
+            >
+              <app-icono nombre="candado" />
+              <input
+                id="reg-confirmacion"
+                formControlName="confirmacion"
+                [type]="verContrasena() ? 'text' : 'password'"
+                autocomplete="new-password"
+                placeholder="Repite tu contraseña"
+              />
+            </div>
+            @if (invalido(formRegistro, 'confirmacion')) {
+              <small class="mensaje">Confirma tu contraseña</small>
+            } @else if (noCoinciden) {
+              <small class="mensaje">Las contraseñas no coinciden</small>
+            }
+          </div>
+
+          <button type="submit" class="boton boton-teal" [disabled]="cargando()">
+            {{ cargando() ? 'Creando cuenta…' : 'Crear Cuenta' }}
+            <app-icono nombre="usuarioMas" [tamano]="16" />
+          </button>
+        </form>
+      }
+    </div>
+  </section>
+</main>
