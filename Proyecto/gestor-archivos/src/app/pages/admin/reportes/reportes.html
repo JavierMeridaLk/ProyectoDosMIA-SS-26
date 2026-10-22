@@ -1,0 +1,145 @@
+<div class="cabecera">
+  <h2>Reportes</h2>
+  <p>Estadísticas de archivos, usuarios, compartición y actividad del sistema.</p>
+</div>
+
+<!-- Grupos de reportes -->
+<div class="grupos" role="tablist" aria-label="Grupos de reportes">
+  @for (g of grupos; track g.id) {
+    <button
+      type="button"
+      role="tab"
+      [class.activo]="g.id === grupoId()"
+      [attr.aria-selected]="g.id === grupoId()"
+      (click)="elegirGrupo(g.id)"
+    >
+      {{ g.titulo }}
+    </button>
+  }
+</div>
+
+<!-- Reportes del grupo -->
+<div class="lista-reportes">
+  @for (r of grupo().reportes; track r.id) {
+    <button
+      type="button"
+      class="opcion"
+      [class.activo]="r.id === reporte().id"
+      [attr.aria-pressed]="r.id === reporte().id"
+      (click)="reporte.set(r)"
+    >
+      <app-icono nombre="reportes" [tamano]="16" />
+      {{ r.titulo }}
+    </button>
+  }
+</div>
+
+<section class="reporte" aria-live="polite">
+  <header>
+    <h3>{{ reporte().titulo }}</h3>
+  </header>
+
+  @if (reporte().parametros.length) {
+    <div class="parametros">
+      @if (reporte().parametros.includes('usuario')) {
+        <div class="parametro">
+          <label for="rep-usuario">Usuario</label>
+          <select id="rep-usuario" (change)="usuarioId.set($any($event.target).value)">
+            <option value="" [selected]="!usuarioId()">Selecciona un usuario</option>
+            @for (u of usuarios(); track u._id) {
+              <option [value]="u._id" [selected]="u._id === usuarioId()">{{ u.user }}</option>
+            }
+          </select>
+        </div>
+      }
+      @if (reporte().parametros.includes('periodo')) {
+        <div class="parametro">
+          <label for="rep-periodo">Agrupar por</label>
+          <select id="rep-periodo" (change)="periodo.set($any($event.target).value)">
+            <option value="dia" [selected]="periodo() === 'dia'">Día</option>
+            <option value="semana" [selected]="periodo() === 'semana'">Semana</option>
+            <option value="mes" [selected]="periodo() === 'mes'">Mes</option>
+          </select>
+        </div>
+      }
+      @if (reporte().parametros.includes('rango')) {
+        <div class="parametro">
+          <label for="rep-desde">Desde</label>
+          <input
+            id="rep-desde"
+            type="date"
+            [value]="desde()"
+            [max]="hasta() || null"
+            (change)="desde.set($any($event.target).value)"
+          />
+        </div>
+        <div class="parametro">
+          <label for="rep-hasta">Hasta</label>
+          <input
+            id="rep-hasta"
+            type="date"
+            [value]="hasta()"
+            [min]="desde() || null"
+            (change)="hasta.set($any($event.target).value)"
+          />
+        </div>
+        @if (desde() || hasta()) {
+          <button type="button" class="limpiar" (click)="desde.set(''); hasta.set('')">
+            <app-icono nombre="cerrar" [tamano]="14" /> Quitar fechas
+          </button>
+        }
+      }
+    </div>
+  }
+
+  @if (error()) {
+    <div class="alerta" role="alert">
+      <app-icono nombre="alerta" [tamano]="16" />
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  @if (faltaUsuario()) {
+    <p class="aviso-vacio">Selecciona un usuario para generar este reporte.</p>
+  } @else if (cargando()) {
+    <p class="aviso-vacio">Generando reporte…</p>
+  } @else if (filas().length) {
+    <div class="tabla-contenedor">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col" class="numero-fila">#</th>
+            @for (c of reporte().columnas; track c.clave) {
+              <th scope="col" [class.derecha]="esNumerica(c.formato)">{{ c.titulo }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (fila of filas(); track $index) {
+            <tr>
+              <td class="numero-fila">{{ $index + 1 }}</td>
+              @for (c of reporte().columnas; track c.clave) {
+                <td [class.derecha]="esNumerica(c.formato)">
+                  @switch (c.formato) {
+                    @case ('bytes') {
+                      {{ $any(fila[c.clave]) | bytes }}
+                    }
+                    @case ('fechaHora') {
+                      {{ fila[c.clave] | date: 'dd/MM/yyyy HH:mm' }}
+                    }
+                    @default {
+                      {{ texto(fila[c.clave], c.formato) }}
+                    }
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="total">{{ filas().length }} {{ filas().length === 1 ? 'fila' : 'filas' }}</p>
+  } @else if (!error()) {
+    <p class="aviso-vacio">No hay datos para este reporte.</p>
+  }
+</section>

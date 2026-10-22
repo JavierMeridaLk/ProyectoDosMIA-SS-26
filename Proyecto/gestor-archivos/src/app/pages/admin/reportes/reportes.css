@@ -1,0 +1,219 @@
+:host {
+  display: block;
+}
+
+.cabecera {
+  margin-bottom: 16px;
+}
+
+.cabecera h2 {
+  margin: 0;
+  padding: 2px 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.cabecera p {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+}
+
+/* Pestañas de grupos */
+.grupos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-bottom: 1px solid #e6ddd6;
+}
+
+.grupos button {
+  padding: 9px 14px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+}
+
+.grupos button:hover {
+  color: var(--navy);
+}
+
+.grupos button.activo {
+  border-bottom-color: var(--navy);
+  color: var(--navy);
+}
+
+/* Reportes del grupo */
+.lista-reportes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 18px;
+}
+
+.opcion {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  background: var(--blanco);
+  font-size: 0.82rem;
+  color: var(--navy);
+}
+
+.opcion:hover {
+  background: #ede5df;
+}
+
+.opcion.activo {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: var(--blanco);
+}
+
+/* Reporte seleccionado */
+.reporte {
+  padding: 18px 20px 16px;
+  background: var(--blanco);
+  border: 1px solid #ece4de;
+  border-radius: 14px;
+}
+
+.reporte header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.parametros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.parametro {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.parametro label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.parametro select,
+.parametro input {
+  height: 36px;
+  min-width: 150px;
+  padding: 0 10px;
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: var(--navy);
+}
+
+.limpiar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+}
+
+.limpiar:hover {
+  background: #ede5df;
+  color: var(--navy);
+}
+
+.alerta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--fondo-error);
+  color: var(--error);
+  font-size: 0.8rem;
+}
+
+.aviso-vacio {
+  margin: 24px 0 8px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+/* Tabla numerada */
+.tabla-contenedor {
+  margin-top: 16px;
+  overflow-x: auto;
+  border: 1px solid #ece4de;
+  border-radius: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+th {
+  padding: 10px 14px;
+  background: #faf7f5;
+  border-bottom: 1px solid #ece4de;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: left;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+  white-space: nowrap;
+}
+
+td {
+  padding: 9px 14px;
+}
+
+tbody tr:nth-child(even) td {
+  background: #fcfaf9;
+}
+
+tbody tr + tr td {
+  border-top: 1px solid #f0e9e4;
+}
+
+.derecha {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.numero-fila {
+  width: 1%;
+  text-align: center;
+  font-weight: 700;
+  color: var(--texto-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+.total {
+  margin: 10px 2px 0;
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}

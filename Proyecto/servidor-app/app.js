@@ -12,6 +12,7 @@ import papeleraRoutes from "./routes/papelera.routes.js";
 import busquedaRoutes from "./routes/busqueda.routes.js";
 import comparticionesRoutes from "./routes/comparticiones.routes.js";
 import actividadRoutes from "./routes/actividad.routes.js";
+import reportesRoutes from "./routes/reportes.routes.js";
 
 //Instancia dse nuestra aplicacion
 const app = express()
@@ -32,6 +33,7 @@ app.use("/api/papelera", papeleraRoutes)
 app.use("/api/busqueda", busquedaRoutes)
 app.use("/api/comparticiones", comparticionesRoutes)
 app.use("/api/actividad", actividadRoutes)
+app.use("/api/reportes", reportesRoutes)
 
 //Cualquier error no controlado responde en JSON
 app.use((error, req, res, next) => {
