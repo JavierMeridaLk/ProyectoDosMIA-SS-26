@@ -17,6 +17,12 @@ export const routes: Routes = [
     title: 'Mi Unidad · Gestor de Archivos',
   },
   {
+    path: 'carpetas/:id',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/inicio/inicio').then((m) => m.Inicio),
+    title: 'Carpeta · Gestor de Archivos',
+  },
+  {
     path: 'documentos/:id',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/editor/editor').then((m) => m.Editor),

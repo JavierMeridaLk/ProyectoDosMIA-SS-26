@@ -1,0 +1,48 @@
+<div class="fondo" (click)="cerrar.emit()">
+  <section
+    class="dialogo"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titulo-carpeta"
+    (click)="$event.stopPropagation()"
+  >
+    <header>
+      <h2 id="titulo-carpeta">Nueva carpeta</h2>
+      <button type="button" class="cerrar" aria-label="Cerrar" (click)="cerrar.emit()">
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <form [formGroup]="form" (ngSubmit)="crear()" novalidate>
+      @if (error()) {
+        <div class="alerta" role="alert">
+          <app-icono nombre="alerta" [tamano]="16" />
+          <span>{{ error() }}</span>
+        </div>
+      }
+
+      <div class="campo">
+        <label for="carpeta-nombre">Nombre</label>
+        <div class="control" [class.invalido]="form.controls.nombre.invalid && form.controls.nombre.touched">
+          <input
+            #campoNombre
+            id="carpeta-nombre"
+            formControlName="nombre"
+            placeholder="Nombre de la carpeta"
+            autocomplete="off"
+          />
+        </div>
+        @if (form.controls.nombre.invalid && form.controls.nombre.touched) {
+          <small class="mensaje">Escribe un nombre válido (sin / ni \)</small>
+        }
+      </div>
+
+      <footer>
+        <button type="button" class="boton boton-borde" (click)="cerrar.emit()">Cancelar</button>
+        <button type="submit" class="boton boton-navy" [disabled]="cargando()">
+          {{ cargando() ? 'Creando…' : 'Crear' }}
+        </button>
+      </footer>
+    </form>
+  </section>
+</div>

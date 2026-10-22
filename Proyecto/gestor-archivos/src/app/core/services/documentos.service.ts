@@ -14,24 +14,20 @@ export class DocumentosService {
   private readonly document = inject(DOCUMENT);
   private readonly url = `${API_URL}/documentos`;
 
-  listar() {
-    return this.http
-      .get<{ documentos: Documento[] }>(this.url)
-      .pipe(map((r) => r.documentos));
-  }
-
   almacenamiento() {
     return this.http.get<Almacenamiento>(`${this.url}/almacenamiento`);
   }
 
-  crear(nombre: string, extension: Extension) {
+  // carpetaId null = se crea en la raiz
+  crear(nombre: string, extension: Extension, carpetaId: string | null) {
     return this.http
-      .post<{ documento: Documento }>(this.url, { nombre, extension })
+      .post<{ documento: Documento }>(this.url, { nombre, extension, carpetaId })
       .pipe(map((r) => r.documento));
   }
 
-  subir(archivo: File) {
+  subir(archivo: File, carpetaId: string | null) {
     const datos = new FormData();
+    if (carpetaId) datos.append('carpetaId', carpetaId);
     datos.append('archivo', archivo);
     return this.http
       .post<{ documento: Documento }>(`${this.url}/subir`, datos)

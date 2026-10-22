@@ -3,6 +3,7 @@ import Documento from "../models/Documento.js";
 import { guardarEnGridFS, leerDeGridFS, abrirDescargaGridFS, eliminarDeGridFS } from "../services/gridfs.service.js";
 import { TAMANO_MAXIMO } from "../middlewares/subida.js";
 import { convertirAUtf8 } from "../services/codificacion.service.js";
+import { buscarCarpetaPropia, nombreValido } from "../services/carpetas.service.js";
 
 const EXTENSIONES = ["txt", "md"]
 
@@ -19,10 +20,6 @@ const separarNombre = (nombreCompleto) => {
         nombre: nombreCompleto.slice(0, punto).trim(),
         extension: nombreCompleto.slice(punto + 1).toLowerCase()
     }
-}
-
-const nombreValido = (nombre) => {
-    return typeof nombre === "string" && nombre.trim().length > 0 && nombre.length <= 100 && !/[\\/]/.test(nombre)
 }
 
 const espacioUsado = async (propietarioId) => {
@@ -43,7 +40,7 @@ const buscarPropio = (id, usuario) => {
     return Documento.findOne({ _id: id, propietarioId: usuario._id, "eliminacion.enPapelera": false })
 }
 
-const crearDocumento = async (usuario, nombre, extension, buffer) => {
+const crearDocumento = async (usuario, carpetaId, nombre, extension, buffer) => {
     const gridfsId = await guardarEnGridFS(`${nombre}.${extension}`, buffer, { propietarioId: usuario._id })
     try {
         return await Documento.create({
@@ -51,6 +48,7 @@ const crearDocumento = async (usuario, nombre, extension, buffer) => {
             extension,
             tamano: buffer.length,
             propietarioId: usuario._id,
+            carpetaId,
             gridfsId
         })
     } catch (error) {
@@ -60,14 +58,11 @@ const crearDocumento = async (usuario, nombre, extension, buffer) => {
     }
 }
 
-export const listarDocumentos = async (req, res) => {
-    const documentos = await Documento.find({
-        propietarioId: req.usuario._id,
-        carpetaId: null,
-        "eliminacion.enPapelera": false
-    }).sort({ fechaModificacion: -1 })
-
-    res.json({ documentos })
+//Valida la carpeta destino que viene en el body. null = raiz
+const carpetaDestino = async (carpetaId, usuario) => {
+    if (!carpetaId) return { valida: true, id: null }
+    const carpeta = await buscarCarpetaPropia(carpetaId, usuario)
+    return { valida: !!carpeta, id: carpeta?._id ?? null }
 }
 
 export const obtenerAlmacenamiento = async (req, res) => {
@@ -90,12 +85,17 @@ export const crear = async (req, res) => {
         return res.status(400).json({ mensaje: "El contenido no es válido" })
     }
 
+    const carpeta = await carpetaDestino(req.body.carpetaId, req.usuario)
+    if (!carpeta.valida) {
+        return res.status(404).json({ mensaje: "La carpeta destino no existe" })
+    }
+
     const buffer = Buffer.from(contenido, "utf8")
     if (!(await hayEspacio(req.usuario, buffer.length))) {
         return res.status(400).json({ mensaje: "No tienes espacio suficiente" })
     }
 
-    const documento = await crearDocumento(req.usuario, nombre.trim(), extension, buffer)
+    const documento = await crearDocumento(req.usuario, carpeta.id, nombre.trim(), extension, buffer)
     res.status(201).json({ documento })
 }
 
@@ -116,6 +116,11 @@ export const subir = async (req, res) => {
     }
 
     //Se acepta cualquier codificacion 
+    const carpeta = await carpetaDestino(req.body.carpetaId, req.usuario)
+    if (!carpeta.valida) {
+        return res.status(404).json({ mensaje: "La carpeta destino no existe" })
+    }
+
     const convertido = convertirAUtf8(req.file.buffer)
     if (!convertido) {
         return res.status(400).json({ mensaje: "El archivo no es un texto válido" })
@@ -126,7 +131,7 @@ export const subir = async (req, res) => {
         return res.status(400).json({ mensaje: "No tienes espacio suficiente" })
     }
 
-    const documento = await crearDocumento(req.usuario, nombre, extension, buffer)
+    const documento = await crearDocumento(req.usuario, carpeta.id, nombre, extension, buffer)
     res.status(201).json({ documento, codificacionOriginal: convertido.codificacion })
 }
 

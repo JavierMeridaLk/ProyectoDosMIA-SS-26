@@ -125,7 +125,9 @@ export class Editor implements OnInit {
     if (this.sinGuardar() && !confirm('Tienes cambios sin guardar. ¿Salir de todos modos?')) {
       return;
     }
-    this.router.navigate(['/inicio']);
+    // Regresa a la carpeta donde esta el documento
+    const carpetaId = this.documento()?.carpetaId;
+    this.router.navigate(carpetaId ? ['/carpetas', carpetaId] : ['/inicio']);
   }
 
   protected atajoGuardar(evento: Event) {

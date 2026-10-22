@@ -1,6 +1,5 @@
 import { Router } from "express";
 import {
-    listarDocumentos,
     obtenerAlmacenamiento,
     crear,
     subir,
@@ -15,7 +14,6 @@ const router = Router()
 
 router.use(verificarToken)
 
-router.get("/", listarDocumentos)
 router.get("/almacenamiento", obtenerAlmacenamiento)
 router.post("/", crear)
 router.post("/subir", recibirArchivo, subir)

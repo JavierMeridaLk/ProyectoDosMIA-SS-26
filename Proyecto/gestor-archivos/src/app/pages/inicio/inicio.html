@@ -62,7 +62,7 @@
 <div class="contenedor">
   <aside class="lateral">
     <div class="crear">
-      <button type="button" class="boton boton-navy">
+      <button type="button" class="boton boton-navy" (click)="mostrarNuevaCarpeta.set(true)">
         <app-icono nombre="carpetaMas" [tamano]="16" /> Nueva Carpeta
       </button>
       <button type="button" class="boton boton-borde" (click)="mostrarNuevo.set(true)">
@@ -80,7 +80,7 @@
     </div>
 
     <nav class="menu">
-      <a class="activo"><app-icono nombre="disco" /> Mi Unidad</a>
+      <a class="activo" routerLink="/inicio"><app-icono nombre="disco" /> Mi Unidad</a>
       <a><app-icono nombre="usuarios" /> Compartidos conmigo</a>
       <a><app-icono nombre="papelera" /> Papelera</a>
     </nav>
@@ -104,9 +104,20 @@
   </aside>
 
   <main class="contenido">
-    <div class="contenido-cabecera">
-      <h2>Mi Unidad</h2>
-    </div>
+    <!-- Barra de navegacion: Mi Unidad › antecesores › carpeta actual -->
+    <nav class="migas" aria-label="Ubicación">
+      @if (carpetaActual(); as actual) {
+        <a routerLink="/inicio">Mi Unidad</a>
+        @for (antecesor of ruta(); track antecesor._id) {
+          <span class="separador" aria-hidden="true">›</span>
+          <a [routerLink]="['/carpetas', antecesor._id]">{{ antecesor.nombre }}</a>
+        }
+        <span class="separador" aria-hidden="true">›</span>
+        <h2 aria-current="page">{{ actual.nombre }}</h2>
+      } @else {
+        <h2 aria-current="page">Mi Unidad</h2>
+      }
+    </nav>
 
     @if (error()) {
       <div class="alerta" role="alert">
@@ -118,8 +129,22 @@
       </div>
     }
 
-    @if (documentos().length) {
+    @if (cargando()) {
+      <p class="cargando">Cargando…</p>
+    } @else if (!vacia()) {
       <div class="tarjetas">
+        @for (carpeta of carpetas(); track carpeta._id) {
+          <button
+            type="button"
+            class="tarjeta"
+            [title]="carpeta.nombre"
+            (click)="abrirCarpeta(carpeta)"
+          >
+            <img class="tarjeta-carpeta" src="logo.svg" alt="" width="52" height="52" />
+            <span class="tarjeta-nombre">{{ carpeta.nombre }}</span>
+            <small>Carpeta</small>
+          </button>
+        }
         @for (doc of documentos(); track doc._id) {
           <button
             type="button"
@@ -133,15 +158,31 @@
           </button>
         }
       </div>
-    } @else {
+    } @else if (!error()) {
       <div class="vacio">
         <app-icono nombre="carpeta" [tamano]="44" />
-        <h3>Bienvenido, {{ auth.usuario()?.user }}</h3>
+        @if (carpetaActual()) {
+          <h3>Esta carpeta está vacía</h3>
+        } @else {
+          <h3>Bienvenido, {{ auth.usuario()?.user }}</h3>
+        }
       </div>
     }
   </main>
 </div>
 
 @if (mostrarNuevo()) {
-  <app-nuevo-documento (creado)="alCrear($event)" (cerrar)="mostrarNuevo.set(false)" />
+  <app-nuevo-documento
+    [carpetaId]="id() ?? null"
+    (creado)="alCrear($event)"
+    (cerrar)="mostrarNuevo.set(false)"
+  />
+}
+
+@if (mostrarNuevaCarpeta()) {
+  <app-nueva-carpeta
+    [padreId]="id() ?? null"
+    (creada)="alCrearCarpeta()"
+    (cerrar)="mostrarNuevaCarpeta.set(false)"
+  />
 }

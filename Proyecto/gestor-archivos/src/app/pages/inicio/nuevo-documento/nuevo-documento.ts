@@ -4,6 +4,7 @@ import {
   Component,
   ElementRef,
   inject,
+  input,
   output,
   signal,
   viewChild,
@@ -20,7 +21,7 @@ import { Icono } from '../../../shared/icono/icono';
   selector: 'app-nuevo-documento',
   imports: [ReactiveFormsModule, Icono],
   templateUrl: './nuevo-documento.html',
-  styleUrl: './nuevo-documento.css',
+  styleUrl: '../dialogo.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '(document:keydown.escape)': 'cerrar.emit()' },
 })
@@ -28,6 +29,8 @@ export class NuevoDocumento {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly documentos = inject(DocumentosService);
 
+  // Carpeta donde se crea, null = raiz
+  readonly carpetaId = input<string | null>(null);
   readonly creado = output<Documento>();
   readonly cerrar = output<void>();
 
@@ -54,7 +57,7 @@ export class NuevoDocumento {
     this.cargando.set(true);
     this.error.set(null);
 
-    this.documentos.crear(nombre.trim(), extension).subscribe({
+    this.documentos.crear(nombre.trim(), extension, this.carpetaId()).subscribe({
       next: (documento) => this.creado.emit(documento),
       error: (err: HttpErrorResponse) => {
         this.error.set(mensajeDeError(err));
