@@ -1,0 +1,122 @@
+<div class="cabecera">
+  <h2>
+    @if (filtros().q.trim()) {
+      Resultados para «{{ filtros().q.trim() }}»
+    } @else {
+      Búsqueda
+    }
+  </h2>
+  @if (hayCriterio() && !cargando()) {
+    <span class="contador">
+      {{ resultados().length }} {{ resultados().length === 1 ? 'resultado' : 'resultados' }}
+    </span>
+  }
+</div>
+
+<!-- Filtros -->
+<div class="filtros">
+  <div class="filtro">
+    <label for="filtro-tipo">Tipo</label>
+    <select
+      id="filtro-tipo"
+      [value]="filtros().tipo"
+      (change)="filtrar('tipo', $any($event.target).value)"
+    >
+      <option value="todos">Todos</option>
+      <option value="carpeta">Carpetas</option>
+      <option value="txt">Texto (.txt)</option>
+      <option value="md">Markdown (.md)</option>
+    </select>
+  </div>
+
+  <div class="filtro">
+    <label for="filtro-desde">Desde</label>
+    <input
+      id="filtro-desde"
+      type="date"
+      [value]="filtros().desde"
+      [max]="filtros().hasta || null"
+      (change)="filtrar('desde', $any($event.target).value)"
+    />
+  </div>
+
+  <div class="filtro">
+    <label for="filtro-hasta">Hasta</label>
+    <input
+      id="filtro-hasta"
+      type="date"
+      [value]="filtros().hasta"
+      [min]="filtros().desde || null"
+      (change)="filtrar('hasta', $any($event.target).value)"
+    />
+  </div>
+
+  <div class="filtro filtro-autor">
+    <label for="filtro-autor">Autor</label>
+    <input
+      id="filtro-autor"
+      type="search"
+      placeholder="Nombre de usuario"
+      [value]="filtros().autor"
+      (change)="filtrar('autor', $any($event.target).value)"
+    />
+  </div>
+
+  @if (hayFiltros()) {
+    <button type="button" class="limpiar" (click)="limpiarFiltros()">
+      <app-icono nombre="cerrar" [tamano]="14" /> Limpiar filtros
+    </button>
+  }
+</div>
+<p class="nota">La fecha es la de modificación para documentos y la de creación para carpetas.</p>
+
+@if (error()) {
+  <div class="alerta" role="alert">
+    <app-icono nombre="alerta" [tamano]="16" />
+    <span>{{ error() }}</span>
+  </div>
+}
+
+@if (!hayCriterio()) {
+  <div class="vacio">
+    <app-icono nombre="buscar" [tamano]="44" />
+    <h3>Escribe en la barra de búsqueda o usa los filtros</h3>
+  </div>
+} @else if (cargando()) {
+  <p class="cargando">Buscando…</p>
+} @else if (resultados().length) {
+  <ul class="lista">
+    @for (resultado of resultados(); track resultado._id) {
+      <li>
+        <button type="button" class="fila" (click)="abrir(resultado)">
+          @if (resultado.tipo === 'carpeta') {
+            <img class="icono-carpeta" src="logo.svg" alt="" width="36" height="36" />
+          } @else {
+            <span class="icono-documento"><app-icono nombre="archivo" [tamano]="20" /></span>
+          }
+          <span class="datos">
+            <strong>
+              {{ resultado.nombre }}{{ resultado.extension ? '.' + resultado.extension : '' }}
+            </strong>
+            <small>
+              @if (resultado.tipo === 'carpeta') {
+                Carpeta
+              } @else {
+                <span class="ext">{{ resultado.extension }}</span> · {{ resultado.tamano | bytes }}
+              }
+              · En {{ resultado.ubicacion }}
+              · Autor: {{ resultado.propio ? 'Tú' : resultado.autor }}
+              · {{ resultado.tipo === 'carpeta' ? 'Creada' : 'Modificado' }} el
+              {{ resultado.fecha | date: 'dd/MM/yyyy' }}
+            </small>
+          </span>
+        </button>
+      </li>
+    }
+  </ul>
+} @else if (!error()) {
+  <div class="vacio">
+    <app-icono nombre="buscar" [tamano]="44" />
+    <h3>No se encontraron resultados</h3>
+  </div>
+}

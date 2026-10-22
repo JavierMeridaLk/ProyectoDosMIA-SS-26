@@ -31,6 +31,11 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/papelera/papelera').then((m) => m.Papelera),
         title: 'Papelera · Gestor de Archivos',
       },
+      {
+        path: 'buscar',
+        loadComponent: () => import('./pages/busqueda/busqueda').then((m) => m.Busqueda),
+        title: 'Búsqueda · Gestor de Archivos',
+      },
     ],
   },
   {

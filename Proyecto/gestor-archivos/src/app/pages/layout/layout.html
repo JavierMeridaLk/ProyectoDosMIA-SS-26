@@ -4,10 +4,17 @@
     <span>Gestor de Archivos</span>
   </div>
 
-  <label class="busqueda">
+  <form class="busqueda" role="search" (submit)="$event.preventDefault(); buscar(campoBusqueda.value)">
     <app-icono nombre="buscar" [tamano]="16" />
-    <input type="search" placeholder="Buscar archivos, documentos o carpetas..." />
-  </label>
+    <input
+      #campoBusqueda
+      type="search"
+      aria-label="Buscar"
+      placeholder="Buscar archivos, documentos o carpetas..."
+      [value]="textoBusqueda()"
+      (input)="alEscribirBusqueda(campoBusqueda.value)"
+    />
+  </form>
 
   <div class="acciones">
     <div class="perfil">
@@ -80,7 +87,7 @@
     </div>
 
     <nav class="menu">
-      <a routerLink="/inicio" [class.activo]="!enPapelera()">
+      <a routerLink="/inicio" [class.activo]="enUnidad()">
         <app-icono nombre="disco" /> Mi Unidad
       </a>
       <a><app-icono nombre="usuarios" /> Compartidos conmigo</a>

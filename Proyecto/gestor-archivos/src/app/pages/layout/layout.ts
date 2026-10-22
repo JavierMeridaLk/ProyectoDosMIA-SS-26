@@ -61,6 +61,17 @@ export class Layout implements OnInit {
   );
 
   protected readonly enPapelera = computed(() => this.url().startsWith('/papelera'));
+  private readonly enBusqueda = computed(() => this.url().startsWith('/buscar'));
+  // Mi Unidad o una carpeta: ahi se ve lo que se crea o sube
+  protected readonly enUnidad = computed(
+    () => this.url().startsWith('/inicio') || this.url().startsWith('/carpetas'),
+  );
+
+  // El texto de la barra sale de la URL para que coincida con los resultados mostrados
+  protected readonly textoBusqueda = computed(() =>
+    this.enBusqueda() ? (this.router.parseUrl(this.url()).queryParams['q'] ?? '') : '',
+  );
+  private temporizadorBusqueda?: ReturnType<typeof setTimeout>;
 
   protected readonly porcentajeUsado = computed(() => {
     const total = this.auth.usuario()?.almacenamiento ?? 0;
@@ -125,13 +136,32 @@ export class Layout implements OnInit {
     }
   }
 
-  // Desde la papelera lo nuevo se crea en Mi Unidad, asi que se lleva al usuario ahi
+  // Busca mientras se escribe
+  protected alEscribirBusqueda(texto: string) {
+    clearTimeout(this.temporizadorBusqueda);
+    this.temporizadorBusqueda = setTimeout(() => this.buscar(texto), 350);
+  }
+
+  protected buscar(texto: string) {
+    clearTimeout(this.temporizadorBusqueda);
+    const q = texto.trim();
+    if (!q && !this.enBusqueda()) return;
+
+    this.router.navigate(['/buscar'], {
+      queryParams: { q: q || null },
+      // Conserva los filtros elegidos
+      queryParamsHandling: 'merge',
+      replaceUrl: this.enBusqueda(),
+    });
+  }
+
+
   private mostrarResultado(texto: string) {
     this.unidad.avisar(texto);
-    if (this.enPapelera()) {
-      this.router.navigate(['/inicio']);
-    } else {
+    if (this.enUnidad()) {
       this.unidad.recargarContenido();
+    } else {
+      this.router.navigate(['/inicio']);
     }
   }
 }
