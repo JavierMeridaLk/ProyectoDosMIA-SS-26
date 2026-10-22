@@ -36,6 +36,16 @@
   color: var(--navy);
 }
 
+/* Permiso en una carpeta compartida */
+.permiso {
+  margin-left: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--sky);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
 .cargando {
   color: var(--texto-suave);
   font-size: 0.85rem;
@@ -100,34 +110,45 @@
   background: none;
 }
 
-/* Boton de eliminar: aparece al pasar el mouse o con el teclado */
-.tarjeta-eliminar {
+/* Acciones (compartir, eliminar): aparecen al pasar el mouse o con el teclado */
+.tarjeta-acciones {
   position: absolute;
   top: 8px;
   right: 8px;
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.tarjeta:hover .tarjeta-acciones,
+.tarjeta-acciones:focus-within {
+  opacity: 1;
+}
+
+.tarjeta-acciones button {
   display: inline-flex;
   padding: 6px;
   border: 0;
   border-radius: 8px;
   background: var(--blanco);
   color: var(--texto-suave);
-  opacity: 0;
-  transition: opacity 0.15s, background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
 
-.tarjeta:hover .tarjeta-eliminar,
-.tarjeta-eliminar:focus-visible {
-  opacity: 1;
+.tarjeta-acciones button:hover {
+  background: var(--beige);
+  color: var(--navy);
 }
 
-.tarjeta-eliminar:hover {
+.tarjeta-acciones .eliminar:hover {
   background: var(--fondo-error);
   color: var(--error);
 }
 
-/* En pantallas tactiles no hay hover, se muestra siempre */
+/* En pantallas tactiles no hay hover, se muestran siempre */
 @media (hover: none) {
-  .tarjeta-eliminar {
+  .tarjeta-acciones {
     opacity: 1;
   }
 }

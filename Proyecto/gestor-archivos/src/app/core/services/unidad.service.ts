@@ -14,6 +14,8 @@ export class UnidadService {
 
   // Carpeta que se esta viendo, ahi se crean y suben los documentos
   readonly carpetaActualId = signal<string | null>(null);
+  // false cuando se esta viendo una carpeta que otro usuario compartio
+  readonly vistaPropia = signal(true);
   readonly usado = signal(0);
  
   readonly version = signal(0);

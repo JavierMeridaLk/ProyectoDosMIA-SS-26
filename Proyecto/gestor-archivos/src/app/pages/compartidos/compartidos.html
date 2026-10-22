@@ -1,0 +1,48 @@
+<div class="cabecera">
+  <h2>Compartidos conmigo</h2>
+  <p>Archivos y carpetas que otros usuarios compartieron contigo.</p>
+</div>
+
+@if (error()) {
+  <div class="alerta" role="alert">
+    <app-icono nombre="alerta" [tamano]="16" />
+    <span>{{ error() }}</span>
+  </div>
+}
+
+@if (cargando()) {
+  <p class="cargando">Cargando…</p>
+} @else if (recursos().length) {
+  <ul class="lista">
+    @for (recurso of recursos(); track recurso._id) {
+      <li>
+        <button type="button" class="fila" (click)="abrir(recurso)">
+          @if (recurso.tipo === 'carpeta') {
+            <img class="icono-carpeta" src="logo.svg" alt="" width="36" height="36" />
+          } @else {
+            <span class="icono-documento"><app-icono nombre="archivo" [tamano]="20" /></span>
+          }
+          <span class="datos">
+            <strong>
+              {{ recurso.nombre }}{{ recurso.extension ? '.' + recurso.extension : '' }}
+            </strong>
+            <small>
+              @if (recurso.tipo === 'carpeta') {
+                Carpeta
+              } @else {
+                <span class="ext">{{ recurso.extension }}</span> · {{ recurso.tamano | bytes }}
+              }
+              · Compartido por {{ recurso.propietario }} el {{ recurso.fecha | date: 'dd/MM/yyyy' }}
+            </small>
+          </span>
+          <span class="permiso">{{ etiquetas[recurso.permiso] }}</span>
+        </button>
+      </li>
+    }
+  </ul>
+} @else if (!error()) {
+  <div class="vacio">
+    <app-icono nombre="usuarios" [tamano]="44" />
+    <h3>Nadie ha compartido nada contigo todavía</h3>
+  </div>
+}

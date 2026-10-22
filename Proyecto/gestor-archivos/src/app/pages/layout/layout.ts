@@ -67,6 +67,11 @@ export class Layout implements OnInit {
     () => this.url().startsWith('/inicio') || this.url().startsWith('/carpetas'),
   );
 
+  // La lista de compartidos o una carpeta que otro usuario compartio
+  protected readonly enCompartidos = computed(
+    () => this.url().startsWith('/compartidos') || (this.enUnidad() && !this.unidad.vistaPropia()),
+  );
+
   // El texto de la barra sale de la URL para que coincida con los resultados mostrados
   protected readonly textoBusqueda = computed(() =>
     this.enBusqueda() ? (this.router.parseUrl(this.url()).queryParams['q'] ?? '') : '',
@@ -158,7 +163,7 @@ export class Layout implements OnInit {
 
   private mostrarResultado(texto: string) {
     this.unidad.avisar(texto);
-    if (this.enUnidad()) {
+    if (this.enUnidad() && this.unidad.vistaPropia()) {
       this.unidad.recargarContenido();
     } else {
       this.router.navigate(['/inicio']);

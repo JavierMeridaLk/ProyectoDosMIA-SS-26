@@ -7,10 +7,16 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 
-import { Documento } from '../../core/models/documento.model';
+import { Comentario, Documento } from '../../core/models/documento.model';
+import {
+  ETIQUETAS_PERMISO,
+  PermisoEfectivo,
+  tienePermiso,
+} from '../../core/models/comparticion.model';
 import { DocumentosService } from '../../core/services/documentos.service';
 import { mensajeDeError } from '../../core/mensaje-error';
 import { Icono } from '../../shared/icono/icono';
@@ -19,7 +25,7 @@ const SANGRIA = '    ';
 
 @Component({
   selector: 'app-editor',
-  imports: [Icono],
+  imports: [Icono, DatePipe],
   templateUrl: './editor.html',
   styleUrl: './editor.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,6 +51,18 @@ export class Editor implements OnInit {
   protected readonly guardando = signal(false);
   protected readonly error = signal<string | null>(null);
 
+  // Lo que el usuario puede hacer con el documento 
+  protected readonly permiso = signal<PermisoEfectivo | null>(null);
+  protected readonly etiquetas = ETIQUETAS_PERMISO;
+  protected readonly puedeEditar = computed(() => tienePermiso(this.permiso(), 'EDICION'));
+  protected readonly puedeComentar = computed(() => tienePermiso(this.permiso(), 'COMENTAR'));
+  // Si se tiene acceso a la carpeta del documento se puede regresar a ella
+  private readonly carpetaAccesible = signal(false);
+
+  protected readonly comentarios = signal<Comentario[]>([]);
+  protected readonly mostrarComentarios = signal(false);
+  protected readonly comentando = signal(false);
+
   protected readonly linea = signal(1);
   protected readonly columna = signal(1);
 
@@ -57,8 +75,11 @@ export class Editor implements OnInit {
 
   ngOnInit() {
     this.documentos.obtener(this.id()).subscribe({
-      next: ({ documento, contenido }) => {
+      next: ({ documento, contenido, permiso, carpetaAccesible }) => {
         this.documento.set(documento);
+        this.permiso.set(permiso);
+        this.carpetaAccesible.set(carpetaAccesible);
+        this.comentarios.set(documento.comentarios ?? []);
         this.textoInicial.set(contenido);
         this.contenido.set(contenido);
         this.contenidoGuardado.set(contenido);
@@ -86,7 +107,7 @@ export class Editor implements OnInit {
 
   // Tab escribe espacios en lugar de salir del editor
   protected alPresionarTecla(evento: KeyboardEvent, area: HTMLTextAreaElement) {
-    if (evento.key !== 'Tab') return;
+    if (evento.key !== 'Tab' || !this.puedeEditar()) return;
     evento.preventDefault();
     area.setRangeText(SANGRIA, area.selectionStart, area.selectionEnd, 'end');
     this.alEscribir(area);
@@ -94,7 +115,7 @@ export class Editor implements OnInit {
 
   protected guardar() {
     const documento = this.documento();
-    if (!documento || !this.sinGuardar() || this.guardando()) return;
+    if (!documento || !this.puedeEditar() || !this.sinGuardar() || this.guardando()) return;
 
     const texto = this.contenido();
     this.guardando.set(true);
@@ -125,9 +146,32 @@ export class Editor implements OnInit {
     if (this.sinGuardar() && !confirm('Tienes cambios sin guardar. ¿Salir de todos modos?')) {
       return;
     }
-    // Regresa a la carpeta donde esta el documento
+    // Regresa a la carpeta del documento
     const carpetaId = this.documento()?.carpetaId;
-    this.router.navigate(carpetaId ? ['/carpetas', carpetaId] : ['/inicio']);
+    if (carpetaId && this.carpetaAccesible()) {
+      this.router.navigate(['/carpetas', carpetaId]);
+    } else {
+      this.router.navigate([this.permiso() === 'PROPIETARIO' ? '/inicio' : '/compartidos']);
+    }
+  }
+
+  protected comentar(campo: HTMLTextAreaElement) {
+    const documento = this.documento();
+    const texto = campo.value.trim();
+    if (!documento || !texto || this.comentando()) return;
+
+    this.comentando.set(true);
+    this.documentos.comentar(documento._id, texto).subscribe({
+      next: (comentario) => {
+        this.comentarios.update((lista) => [...lista, comentario]);
+        campo.value = '';
+        this.comentando.set(false);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.error.set(mensajeDeError(err));
+        this.comentando.set(false);
+      },
+    });
   }
 
   protected atajoGuardar(evento: Event) {

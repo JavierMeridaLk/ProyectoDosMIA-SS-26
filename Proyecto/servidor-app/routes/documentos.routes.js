@@ -5,7 +5,8 @@ import {
     subir,
     obtener,
     guardarContenido,
-    descargar
+    descargar,
+    comentar
 } from "../controllers/documentos.controller.js";
 import { verificarToken } from "../middlewares/auth.js";
 import { recibirArchivo } from "../middlewares/subida.js";
@@ -21,6 +22,7 @@ router.post("/subir", recibirArchivo, subir)
 router.get("/:id", obtener)
 router.put("/:id/contenido", guardarContenido)
 router.get("/:id/descargar", descargar)
+router.post("/:id/comentarios", comentar)
 router.delete("/:id", enviarDocumentoAPapelera)
 
 export default router

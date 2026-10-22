@@ -3,7 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { map, tap } from 'rxjs';
 
 import { API_URL } from '../config';
-import { Almacenamiento, Documento, Extension } from '../models/documento.model';
+import { Almacenamiento, Comentario, Documento, Extension } from '../models/documento.model';
+import { PermisoEfectivo } from '../models/comparticion.model';
 
 export const EXTENSIONES_PERMITIDAS = ['txt', 'md'];
 export const TAMANO_MAXIMO = 5 * 1024 * 1024;
@@ -35,7 +36,12 @@ export class DocumentosService {
   }
 
   obtener(id: string) {
-    return this.http.get<{ documento: Documento; contenido: string }>(`${this.url}/${id}`);
+    return this.http.get<{
+      documento: Documento;
+      contenido: string;
+      permiso: PermisoEfectivo;
+      carpetaAccesible: boolean;
+    }>(`${this.url}/${id}`);
   }
 
   guardarContenido(id: string, contenido: string) {
@@ -55,6 +61,12 @@ export class DocumentosService {
         URL.revokeObjectURL(enlace.href);
       }),
     );
+  }
+
+  comentar(id: string, texto: string) {
+    return this.http
+      .post<{ comentario: Comentario }>(`${this.url}/${id}/comentarios`, { texto })
+      .pipe(map((r) => r.comentario));
   }
 
   // Lo mueve a la papelera (no lo borra)

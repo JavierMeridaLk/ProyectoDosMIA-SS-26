@@ -18,14 +18,16 @@ import { CarpetasService } from '../../core/services/carpetas.service';
 import { UnidadService } from '../../core/services/unidad.service';
 import { Documento } from '../../core/models/documento.model';
 import { Carpeta, CarpetaEnRuta } from '../../core/models/carpeta.model';
+import { ETIQUETAS_PERMISO, PermisoEfectivo, TipoRecurso } from '../../core/models/comparticion.model';
 import { mensajeDeError } from '../../core/mensaje-error';
 import { Icono } from '../../shared/icono/icono';
 import { BytesPipe } from '../../shared/pipes/bytes.pipe';
+import { Compartir } from './compartir/compartir';
 
 // Contenido de Mi Unidad o de una carpeta (/inicio y /carpetas/:id)
 @Component({
   selector: 'app-inicio',
-  imports: [Icono, BytesPipe, RouterLink],
+  imports: [Icono, BytesPipe, RouterLink, Compartir],
   templateUrl: './inicio.html',
   styleUrl: './inicio.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,6 +50,14 @@ export class Inicio {
   protected readonly carpetas = signal<Carpeta[]>([]);
   protected readonly documentos = signal<Documento[]>([]);
 
+  // false cuando la carpeta es de otro usuario y me la compartieron
+  protected readonly propio = signal(true);
+  protected readonly permiso = signal<PermisoEfectivo>('PROPIETARIO');
+  protected readonly etiquetas = ETIQUETAS_PERMISO;
+
+  // Recurso que se esta compartiendo (abre el dialogo)
+  protected readonly compartiendo = signal<{ tipo: TipoRecurso; id: string; nombre: string } | null>(null);
+
   protected readonly vacia = computed(
     () => !this.carpetas().length && !this.documentos().length,
   );
@@ -59,10 +69,7 @@ export class Inicio {
     effect(() => {
       const id = this.id() ?? null;
       this.unidad.version();
-      untracked(() => {
-        this.unidad.carpetaActualId.set(id);
-        this.cargarContenido(id);
-      });
+      untracked(() => this.cargarContenido(id));
     });
   }
 
@@ -102,7 +109,12 @@ export class Inicio {
     this.error.set(null);
 
     this.cargaActual = this.carpetasService.contenido(id).subscribe({
-      next: ({ carpeta, ruta, carpetas, documentos }) => {
+      next: ({ carpeta, ruta, carpetas, documentos, permiso, propio }) => {
+        // En una carpeta compartida lo que se crea desde la barra lateral va a Mi Unidad
+        this.unidad.carpetaActualId.set(propio ? id : null);
+        this.unidad.vistaPropia.set(propio);
+        this.propio.set(propio);
+        this.permiso.set(permiso);
         this.carpetaActual.set(carpeta);
         this.ruta.set(ruta);
         this.carpetas.set(carpetas);
@@ -110,6 +122,8 @@ export class Inicio {
         this.cargando.set(false);
       },
       error: (err: HttpErrorResponse) => {
+        this.unidad.carpetaActualId.set(null);
+        this.unidad.vistaPropia.set(true);
         this.carpetaActual.set(null);
         this.ruta.set([]);
         this.carpetas.set([]);

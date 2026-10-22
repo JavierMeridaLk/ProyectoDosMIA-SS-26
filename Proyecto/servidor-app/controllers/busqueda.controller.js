@@ -2,24 +2,11 @@ import Carpeta from "../models/Carpeta.js";
 import Documento from "../models/Documento.js";
 import Usuario from "../models/Usuario.js";
 import Comparticion from "../models/Comparticion.js";
+import { contiene } from "../services/texto.service.js";
 
 const TIPOS = ["todos", "carpeta", "txt", "md"]
 const LIMITE = 100
 
-const VARIANTES = { a: "aáàäâ", e: "eéèëê", i: "iíìïî", o: "oóòöô", u: "uúùüû", n: "nñ" }
-
-
-const contiene = (texto) => {
-    const patron = texto.trim()
-        .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-        .split("")
-        .map((letra) => {
-            const base = letra.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()
-            return VARIANTES[base] ? `[${VARIANTES[base]}]` : letra
-        })
-        .join("")
-    return new RegExp(patron, "i")
-}
 
 //Lo que el usuario puede ver
 const alcanceDelUsuario = async (usuario) => {

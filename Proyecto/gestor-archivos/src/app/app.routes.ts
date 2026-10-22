@@ -32,6 +32,11 @@ export const routes: Routes = [
         title: 'Papelera · Gestor de Archivos',
       },
       {
+        path: 'compartidos',
+        loadComponent: () => import('./pages/compartidos/compartidos').then((m) => m.Compartidos),
+        title: 'Compartidos conmigo · Gestor de Archivos',
+      },
+      {
         path: 'buscar',
         loadComponent: () => import('./pages/busqueda/busqueda').then((m) => m.Busqueda),
         title: 'Búsqueda · Gestor de Archivos',

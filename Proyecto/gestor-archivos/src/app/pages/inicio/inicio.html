@@ -1,13 +1,20 @@
-<!-- Barra de navegacion: Mi Unidad › antecesores › carpeta actual -->
+<!-- Barra de navegacion: Mi Unidad (o Compartidos conmigo) › antecesores › carpeta actual -->
 <nav class="migas" aria-label="Ubicación">
   @if (carpetaActual(); as actual) {
-    <a routerLink="/inicio">Mi Unidad</a>
+    @if (propio()) {
+      <a routerLink="/inicio">Mi Unidad</a>
+    } @else {
+      <a routerLink="/compartidos">Compartidos conmigo</a>
+    }
     @for (antecesor of ruta(); track antecesor._id) {
       <span class="separador" aria-hidden="true">›</span>
       <a [routerLink]="['/carpetas', antecesor._id]">{{ antecesor.nombre }}</a>
     }
     <span class="separador" aria-hidden="true">›</span>
     <h2 aria-current="page">{{ actual.nombre }}</h2>
+    @if (!propio()) {
+      <span class="permiso" title="Tu permiso sobre esta carpeta">{{ etiquetas[permiso()] }}</span>
+    }
   } @else {
     <h2 aria-current="page">Mi Unidad</h2>
   }
@@ -39,15 +46,28 @@
           <span class="tarjeta-nombre">{{ carpeta.nombre }}</span>
           <small>Carpeta</small>
         </button>
-        <button
-          type="button"
-          class="tarjeta-eliminar"
-          title="Mover a la papelera"
-          [attr.aria-label]="'Mover ' + carpeta.nombre + ' a la papelera'"
-          (click)="eliminarCarpeta(carpeta)"
-        >
-          <app-icono nombre="papelera" [tamano]="15" />
-        </button>
+        <!-- Solo el propietario puede compartir o eliminar -->
+        @if (propio()) {
+          <div class="tarjeta-acciones">
+            <button
+              type="button"
+              title="Compartir"
+              [attr.aria-label]="'Compartir ' + carpeta.nombre"
+              (click)="compartiendo.set({ tipo: 'carpetas', id: carpeta._id, nombre: carpeta.nombre })"
+            >
+              <app-icono nombre="compartir" [tamano]="15" />
+            </button>
+            <button
+              type="button"
+              class="eliminar"
+              title="Mover a la papelera"
+              [attr.aria-label]="'Mover ' + carpeta.nombre + ' a la papelera'"
+              (click)="eliminarCarpeta(carpeta)"
+            >
+              <app-icono nombre="papelera" [tamano]="15" />
+            </button>
+          </div>
+        }
       </div>
     }
     @for (doc of documentos(); track doc._id) {
@@ -62,15 +82,33 @@
           <span class="tarjeta-nombre">{{ doc.nombre }}.{{ doc.extension }}</span>
           <small><span class="ext">{{ doc.extension }}</span> · {{ doc.tamano | bytes }}</small>
         </button>
-        <button
-          type="button"
-          class="tarjeta-eliminar"
-          title="Mover a la papelera"
-          [attr.aria-label]="'Mover ' + doc.nombre + '.' + doc.extension + ' a la papelera'"
-          (click)="eliminarDocumento(doc)"
-        >
-          <app-icono nombre="papelera" [tamano]="15" />
-        </button>
+        @if (propio()) {
+          <div class="tarjeta-acciones">
+            <button
+              type="button"
+              title="Compartir"
+              [attr.aria-label]="'Compartir ' + doc.nombre + '.' + doc.extension"
+              (click)="
+                compartiendo.set({
+                  tipo: 'documentos',
+                  id: doc._id,
+                  nombre: doc.nombre + '.' + doc.extension,
+                })
+              "
+            >
+              <app-icono nombre="compartir" [tamano]="15" />
+            </button>
+            <button
+              type="button"
+              class="eliminar"
+              title="Mover a la papelera"
+              [attr.aria-label]="'Mover ' + doc.nombre + '.' + doc.extension + ' a la papelera'"
+              (click)="eliminarDocumento(doc)"
+            >
+              <app-icono nombre="papelera" [tamano]="15" />
+            </button>
+          </div>
+        }
       </div>
     }
   </div>
@@ -83,4 +121,13 @@
       <h3>Bienvenido, {{ auth.usuario()?.user }}</h3>
     }
   </div>
+}
+
+@if (compartiendo(); as recurso) {
+  <app-compartir
+    [tipo]="recurso.tipo"
+    [recursoId]="recurso.id"
+    [nombre]="recurso.nombre"
+    (cerrar)="compartiendo.set(null)"
+  />
 }

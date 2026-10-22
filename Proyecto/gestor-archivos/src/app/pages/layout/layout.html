@@ -87,10 +87,12 @@
     </div>
 
     <nav class="menu">
-      <a routerLink="/inicio" [class.activo]="enUnidad()">
+      <a routerLink="/inicio" [class.activo]="enUnidad() && unidad.vistaPropia()">
         <app-icono nombre="disco" /> Mi Unidad
       </a>
-      <a><app-icono nombre="usuarios" /> Compartidos conmigo</a>
+      <a routerLink="/compartidos" [class.activo]="enCompartidos()">
+        <app-icono nombre="usuarios" /> Compartidos conmigo
+      </a>
       <a routerLink="/papelera" [class.activo]="enPapelera()">
         <app-icono nombre="papelera" /> Papelera
       </a>

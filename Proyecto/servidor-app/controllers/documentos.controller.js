@@ -1,9 +1,10 @@
-import mongoose from "mongoose";
 import Documento from "../models/Documento.js";
 import { guardarEnGridFS, leerDeGridFS, abrirDescargaGridFS, eliminarDeGridFS } from "../services/gridfs.service.js";
 import { TAMANO_MAXIMO } from "../middlewares/subida.js";
 import { convertirAUtf8 } from "../services/codificacion.service.js";
 import { buscarCarpetaPropia, nombreValido } from "../services/carpetas.service.js";
+import { accesoADocumento, tienePermiso } from "../services/permisos.service.js";
+import Usuario from "../models/Usuario.js";
 
 const EXTENSIONES = ["txt", "md"]
 
@@ -32,12 +33,6 @@ const espacioUsado = async (propietarioId) => {
 
 const hayEspacio = async (usuario, bytesExtra) => {
     return (await espacioUsado(usuario._id)) + bytesExtra <= usuario.almacenamiento
-}
-
-//Solo el propietario puede ver o editar el documento 
-const buscarPropio = (id, usuario) => {
-    if (!mongoose.isValidObjectId(id)) return null
-    return Documento.findOne({ _id: id, propietarioId: usuario._id, "eliminacion.enPapelera": false })
 }
 
 const crearDocumento = async (usuario, carpetaId, nombre, extension, buffer) => {
@@ -135,14 +130,16 @@ export const subir = async (req, res) => {
     res.status(201).json({ documento, codificacionOriginal: convertido.codificacion })
 }
 
+//Propietario o cualquier usuario con permiso 
 export const obtener = async (req, res) => {
-    const documento = await buscarPropio(req.params.id, req.usuario)
-    if (!documento) {
+    const acceso = await accesoADocumento(req.params.id, req.usuario)
+    if (!acceso) {
         return res.status(404).json({ mensaje: "Documento no encontrado" })
     }
 
+    const { documento, permiso, carpetaAccesible } = acceso
     const contenido = (await leerDeGridFS(documento.gridfsId)).toString("utf8")
-    res.json({ documento, contenido })
+    res.json({ documento, contenido, permiso, carpetaAccesible })
 }
 
 export const guardarContenido = async (req, res) => {
@@ -152,23 +149,29 @@ export const guardarContenido = async (req, res) => {
         return res.status(400).json({ mensaje: "El contenido no es válido" })
     }
 
-    const documento = await buscarPropio(req.params.id, req.usuario)
-    if (!documento) {
+    const acceso = await accesoADocumento(req.params.id, req.usuario)
+    if (!acceso) {
         return res.status(404).json({ mensaje: "Documento no encontrado" })
     }
+    if (!tienePermiso(acceso.permiso, "EDICION")) {
+        return res.status(403).json({ mensaje: "No tienes permiso para editar este documento" })
+    }
+    const { documento } = acceso
 
     const buffer = Buffer.from(contenido, "utf8")
     if (buffer.length > TAMANO_MAXIMO) {
         return res.status(400).json({ mensaje: "El documento supera el tamaño máximo de 5 MB" })
     }
-    if (!(await hayEspacio(req.usuario, buffer.length - documento.tamano))) {
-        return res.status(400).json({ mensaje: "No tienes espacio suficiente" })
+    //El espacio que se usa es el del propietario aunque edite otro usuario
+    const propietario = acceso.permiso === "PROPIETARIO" ? req.usuario : await Usuario.findById(documento.propietarioId)
+    if (!(await hayEspacio(propietario, buffer.length - documento.tamano))) {
+        return res.status(400).json({ mensaje: "El propietario no tiene espacio suficiente" })
     }
 
     //Los archivos de GridFS no se modifican
     const anteriorId = documento.gridfsId
     documento.gridfsId = await guardarEnGridFS(
-        `${documento.nombre}.${documento.extension}`, buffer, { propietarioId: req.usuario._id }
+        `${documento.nombre}.${documento.extension}`, buffer, { propietarioId: documento.propietarioId }
     )
     documento.tamano = buffer.length
     documento.fechaModificacion = new Date()
@@ -179,13 +182,38 @@ export const guardarContenido = async (req, res) => {
 }
 
 export const descargar = async (req, res) => {
-    const documento = await buscarPropio(req.params.id, req.usuario)
-    if (!documento) {
+    const acceso = await accesoADocumento(req.params.id, req.usuario)
+    if (!acceso) {
         return res.status(404).json({ mensaje: "Documento no encontrado" })
     }
+    const { documento } = acceso
 
     const nombreArchivo = encodeURIComponent(`${documento.nombre}.${documento.extension}`)
     res.setHeader("Content-Type", TIPOS_CONTENIDO[documento.extension])
     res.setHeader("Content-Disposition", `attachment; filename*=UTF-8''${nombreArchivo}`)
     abrirDescargaGridFS(documento.gridfsId).pipe(res)
+}
+
+//Comentar requiere permiso de comentar o de edicion 
+export const comentar = async (req, res) => {
+    const texto = typeof req.body.texto === "string" ? req.body.texto.trim() : ""
+    if (!texto || texto.length > 1000) {
+        return res.status(400).json({ mensaje: "El comentario debe tener entre 1 y 1000 caracteres" })
+    }
+
+    const acceso = await accesoADocumento(req.params.id, req.usuario)
+    if (!acceso) {
+        return res.status(404).json({ mensaje: "Documento no encontrado" })
+    }
+    if (!tienePermiso(acceso.permiso, "COMENTAR")) {
+        return res.status(403).json({ mensaje: "No tienes permiso para comentar este documento" })
+    }
+
+    const comentario = { usuarioId: req.usuario._id, usuarioNombre: req.usuario.user, texto, fecha: new Date() }
+    const documento = await Documento.findByIdAndUpdate(
+        acceso.documento._id,
+        { $push: { comentarios: comentario } },
+        { returnDocument: "after", projection: { comentarios: { $slice: -1 } } }
+    )
+    res.status(201).json({ comentario: documento.comentarios[0] })
 }

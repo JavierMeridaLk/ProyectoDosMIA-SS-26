@@ -1,0 +1,130 @@
+<div class="fondo" (click)="cerrar.emit()">
+  <section
+    class="dialogo dialogo-ancho"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titulo-compartir"
+    (click)="$event.stopPropagation()"
+  >
+    <header>
+      <h2 id="titulo-compartir">Compartir «{{ nombre() }}»</h2>
+      <button type="button" class="cerrar" aria-label="Cerrar" (click)="cerrar.emit()">
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <div class="cuerpo">
+      <!-- Agregar usuarios -->
+      <label class="etiqueta-campo" for="campo-usuarios">Usuarios</label>
+      <div class="agregar">
+        <div class="destinatarios" (click)="campo.focus()">
+          @for (usuario of destinatarios(); track usuario) {
+            <span class="chip">
+              {{ usuario }}
+              <button
+                type="button"
+                [attr.aria-label]="'Quitar ' + usuario"
+                (click)="quitarDestinatario(usuario)"
+              >
+                <app-icono nombre="cerrar" [tamano]="12" />
+              </button>
+            </span>
+          }
+          <input
+            #campo
+            id="campo-usuarios"
+            type="text"
+            autocomplete="off"
+            [placeholder]="destinatarios().length ? '' : 'Usuario o correo, separa varios con coma'"
+            (input)="alEscribir(campo)"
+            (keydown)="alPresionarTecla($event, campo)"
+          />
+        </div>
+
+        @if (sugerencias().length) {
+          <ul class="sugerencias" role="listbox">
+            @for (usuario of sugerencias(); track usuario._id) {
+              <li>
+                <button type="button" (click)="elegirSugerencia(usuario)">
+                  <span class="avatar">{{ iniciales(usuario.user) }}</span>
+                  <span>
+                    <strong>{{ usuario.user }}</strong>
+                    <small>{{ usuario.correo }}</small>
+                  </span>
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <div class="fila-compartir">
+        <label class="etiqueta-campo" for="permiso-nuevo">Permiso</label>
+        <select id="permiso-nuevo" (change)="permiso.set($any($event.target).value)">
+          @for (p of permisos; track p) {
+            <option [value]="p" [selected]="p === permiso()">{{ etiquetas[p] }}</option>
+          }
+        </select>
+        <button
+          type="button"
+          class="boton boton-navy"
+          [disabled]="enviando()"
+          (click)="compartir()"
+        >
+          {{ enviando() ? 'Compartiendo…' : 'Compartir' }}
+        </button>
+      </div>
+      <p class="ayuda">
+        Lectura: ver y descargar · Comentar: además puede comentar · Edición: además puede
+        modificar el contenido.
+      </p>
+
+      @if (error()) {
+        <div class="alerta" role="alert">
+          <app-icono nombre="alerta" [tamano]="16" />
+          <span>{{ error() }}</span>
+        </div>
+      }
+      @if (exito()) {
+        <div class="exito" role="status">{{ exito() }}</div>
+      }
+
+      <!-- Personas que ya tienen acceso -->
+      <h3>Personas con acceso</h3>
+      @if (cargando()) {
+        <p class="ayuda">Cargando…</p>
+      } @else if (conAcceso().length) {
+        <ul class="con-acceso">
+          @for (c of conAcceso(); track c._id) {
+            <li>
+              <span class="avatar">{{ iniciales(c.usuario?.user) }}</span>
+              <span class="persona">
+                <strong>{{ c.usuario?.user ?? 'Usuario eliminado' }}</strong>
+                <small>{{ c.usuario?.correo }}</small>
+              </span>
+              <select
+                [attr.aria-label]="'Permiso de ' + c.usuario?.user"
+                (change)="cambiarPermiso(c, $any($event.target).value)"
+              >
+                @for (p of permisos; track p) {
+                  <option [value]="p" [selected]="p === c.permiso">{{ etiquetas[p] }}</option>
+                }
+              </select>
+              <button
+                type="button"
+                class="retirar"
+                title="Retirar acceso"
+                [attr.aria-label]="'Retirar acceso a ' + c.usuario?.user"
+                (click)="retirar(c)"
+              >
+                <app-icono nombre="cerrar" [tamano]="14" />
+              </button>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="ayuda">Todavía no lo has compartido con nadie.</p>
+      }
+    </div>
+  </section>
+</div>

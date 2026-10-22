@@ -1,4 +1,5 @@
 import { Documento } from './documento.model';
+import { PermisoEfectivo } from './comparticion.model';
 
 export interface Carpeta {
   _id: string;
@@ -20,4 +21,6 @@ export interface ContenidoCarpeta {
   ruta: CarpetaEnRuta[];
   carpetas: Carpeta[];
   documentos: Documento[];
+  permiso: PermisoEfectivo;
+  propio: boolean;
 }

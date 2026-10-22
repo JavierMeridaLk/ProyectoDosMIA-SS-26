@@ -1,33 +1,37 @@
 import Carpeta from "../models/Carpeta.js";
 import Documento from "../models/Documento.js";
 import { buscarCarpetaPropia, nombreValido } from "../services/carpetas.service.js";
+import { accesoACarpeta } from "../services/permisos.service.js";
 
 //Contenido de una carpeta, subcarpetas, documentos y la ruta para la navegacion
 export const obtenerContenido = async (req, res) => {
     let carpeta = null
+    let permiso = "PROPIETARIO"
+    let rutaVisible = []
 
     if (req.params.id) {
-        carpeta = await buscarCarpetaPropia(req.params.id, req.usuario)
-        if (!carpeta) {
+        const acceso = await accesoACarpeta(req.params.id, req.usuario)
+        if (!acceso) {
             return res.status(404).json({ mensaje: "Carpeta no encontrada" })
         }
+        ;({ carpeta, permiso, rutaVisible } = acceso)
     }
 
-    const filtro = { propietarioId: req.usuario._id, "eliminacion.enPapelera": false }
+    //Dentro de una carpeta compartida el contenido es del propietario
+    const propietarioId = carpeta?.propietarioId ?? req.usuario._id
+    const filtro = { propietarioId, "eliminacion.enPapelera": false }
     const idActual = carpeta?._id ?? null
 
     const [carpetas, documentos, antecesores] = await Promise.all([
         Carpeta.find({ ...filtro, padreId: idActual }).collation({ locale: "es" }).sort({ nombre: 1 }),
-        Documento.find({ ...filtro, carpetaId: idActual }).sort({ fechaModificacion: -1 }),
-        carpeta ? Carpeta.find({ _id: { $in: carpeta.ruta } }, { nombre: 1 }) : []
+        Documento.find({ ...filtro, carpetaId: idActual }, { comentarios: 0 }).sort({ fechaModificacion: -1 }),
+        rutaVisible.length ? Carpeta.find({ _id: { $in: rutaVisible } }, { nombre: 1 }) : []
     ])
 
-    //se acomodan en el mismo orden que ruta 
-    const ruta = carpeta
-        ? carpeta.ruta.map((id) => antecesores.find((a) => a._id.equals(id))).filter(Boolean)
-        : []
+    //se acomodan en el mismo orden que ruta
+    const ruta = rutaVisible.map((id) => antecesores.find((a) => a._id.equals(id))).filter(Boolean)
 
-    res.json({ carpeta, ruta, carpetas, documentos })
+    res.json({ carpeta, ruta, carpetas, documentos, permiso, propio: permiso === "PROPIETARIO" })
 }
 
 export const crear = async (req, res) => {

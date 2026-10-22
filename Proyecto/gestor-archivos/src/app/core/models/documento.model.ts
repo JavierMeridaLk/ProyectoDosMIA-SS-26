@@ -1,5 +1,13 @@
 export type Extension = 'txt' | 'md';
 
+export interface Comentario {
+  _id: string;
+  usuarioId: string;
+  usuarioNombre: string;
+  texto: string;
+  fecha: string;
+}
+
 export interface Documento {
   _id: string;
   nombre: string;
@@ -9,6 +17,7 @@ export interface Documento {
   carpetaId: string | null;
   fechaCarga: string;
   fechaModificacion: string;
+  comentarios?: Comentario[];
 }
 
 export interface Almacenamiento {

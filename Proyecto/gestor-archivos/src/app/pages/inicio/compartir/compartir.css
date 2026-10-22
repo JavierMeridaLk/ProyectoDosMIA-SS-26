@@ -1,0 +1,226 @@
+.dialogo-ancho {
+  max-width: 500px;
+}
+
+h2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+h3 {
+  margin: 20px 0 10px;
+  font-size: 0.85rem;
+}
+
+.etiqueta-campo {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Campo con etiquetas de usuarios */
+.agregar {
+  position: relative;
+}
+
+.destinatarios {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 42px;
+  padding: 6px 10px;
+  background: var(--fondo-input);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  cursor: text;
+}
+
+.destinatarios:focus-within {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgb(86 124 141 / 18%);
+}
+
+.destinatarios input {
+  flex: 1;
+  min-width: 140px;
+  border: 0;
+  background: transparent;
+  padding: 4px 0;
+  font-size: 0.88rem;
+  outline: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 4px 3px 10px;
+  border-radius: 999px;
+  background: var(--sky);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.chip button {
+  display: inline-flex;
+  padding: 2px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--navy);
+}
+
+.chip button:hover {
+  background: rgb(47 65 86 / 12%);
+}
+
+.sugerencias {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 5;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--blanco);
+  border: 1px solid #ece4de;
+  border-radius: 10px;
+  box-shadow: var(--sombra);
+}
+
+.sugerencias button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  text-align: left;
+}
+
+.sugerencias button:hover {
+  background: var(--beige);
+}
+
+.sugerencias strong,
+.sugerencias small,
+.persona strong,
+.persona small {
+  display: block;
+}
+
+.sugerencias small,
+.persona small {
+  font-size: 0.74rem;
+  color: var(--texto-suave);
+}
+
+.fila-compartir {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.fila-compartir .etiqueta-campo {
+  margin: 0;
+}
+
+select {
+  height: 36px;
+  padding: 0 8px;
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: var(--navy);
+}
+
+.fila-compartir .boton {
+  margin-left: auto;
+}
+
+.ayuda {
+  margin: 8px 0 0;
+  font-size: 0.74rem;
+  color: var(--texto-suave);
+}
+
+.alerta,
+.exito {
+  margin-top: 12px;
+}
+
+.exito {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #e8f1ec;
+  color: #2f6b4f;
+  font-size: 0.8rem;
+}
+
+/* Personas con acceso */
+.con-acceso {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.con-acceso li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 4px;
+}
+
+.persona {
+  flex: 1;
+  min-width: 0;
+}
+
+.persona strong,
+.persona small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: var(--blanco);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.retirar {
+  display: inline-flex;
+  padding: 6px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--texto-suave);
+}
+
+.retirar:hover {
+  background: var(--fondo-error);
+  color: var(--error);
+}

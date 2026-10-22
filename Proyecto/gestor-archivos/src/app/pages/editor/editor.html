@@ -1,5 +1,5 @@
 <header class="barra">
-  <button type="button" class="icono-boton" aria-label="Volver a Mi Unidad" (click)="volver()">
+  <button type="button" class="icono-boton" aria-label="Volver" (click)="volver()">
     <app-icono nombre="volver" />
   </button>
 
@@ -7,24 +7,42 @@
     <div class="titulo">
       <app-icono nombre="archivo" />
       <strong [title]="doc.nombre + '.' + doc.extension">{{ doc.nombre }}.{{ doc.extension }}</strong>
-      <small [class.pendiente]="sinGuardar()">
-        {{ guardando() ? 'Guardando…' : sinGuardar() ? 'Cambios sin guardar' : 'Guardado' }}
-      </small>
+      @if (puedeEditar()) {
+        <small [class.pendiente]="sinGuardar()">
+          {{ guardando() ? 'Guardando…' : sinGuardar() ? 'Cambios sin guardar' : 'Guardado' }}
+        </small>
+      }
+      @if (permiso() !== 'PROPIETARIO') {
+        <span class="permiso" title="Tu permiso sobre este documento compartido">
+          {{ permiso() ? etiquetas[permiso()!] : '' }}
+        </span>
+      }
     </div>
 
     <div class="acciones">
+      <button
+        type="button"
+        class="boton boton-borde"
+        [class.activo]="mostrarComentarios()"
+        [attr.aria-pressed]="mostrarComentarios()"
+        (click)="mostrarComentarios.set(!mostrarComentarios())"
+      >
+        <app-icono nombre="comentario" [tamano]="16" /> Comentarios ({{ comentarios().length }})
+      </button>
       <button type="button" class="boton boton-borde" (click)="descargar()">
         <app-icono nombre="descargar" [tamano]="16" /> Descargar
       </button>
-      <button
-        type="button"
-        class="boton boton-navy"
-        title="Guardar (Ctrl+S)"
-        [disabled]="!sinGuardar() || guardando()"
-        (click)="guardar()"
-      >
-        <app-icono nombre="guardar" [tamano]="16" /> Guardar
-      </button>
+      @if (puedeEditar()) {
+        <button
+          type="button"
+          class="boton boton-navy"
+          title="Guardar (Ctrl+S)"
+          [disabled]="!sinGuardar() || guardando()"
+          (click)="guardar()"
+        >
+          <app-icono nombre="guardar" [tamano]="16" /> Guardar
+        </button>
+      }
     </div>
   }
 </header>
@@ -39,29 +57,72 @@
 @if (cargando()) {
   <p class="cargando">Cargando documento…</p>
 } @else if (documento(); as doc) {
-  <div class="editor">
-    <div class="numeros" #numeros aria-hidden="true">
-      @for (n of numerosDeLinea(); track n) {
-        <div [class.actual]="n === linea()">{{ n }}</div>
-      }
+  <div class="area-trabajo">
+    <div class="editor">
+      <div class="numeros" #numeros aria-hidden="true">
+        @for (n of numerosDeLinea(); track n) {
+          <div [class.actual]="n === linea()">{{ n }}</div>
+        }
+      </div>
+      <textarea
+        #area
+        [value]="textoInicial()"
+        (input)="alEscribir(area)"
+        (keydown)="alPresionarTecla($event, area)"
+        (keyup)="actualizarCursor(area)"
+        (mouseup)="actualizarCursor(area)"
+        (focus)="actualizarCursor(area)"
+        (scroll)="numeros.scrollTop = area.scrollTop"
+        [readOnly]="!puedeEditar()"
+        wrap="off"
+        spellcheck="false"
+        aria-label="Contenido del documento"
+      ></textarea>
     </div>
-    <textarea
-      #area
-      [value]="textoInicial()"
-      (input)="alEscribir(area)"
-      (keydown)="alPresionarTecla($event, area)"
-      (keyup)="actualizarCursor(area)"
-      (mouseup)="actualizarCursor(area)"
-      (focus)="actualizarCursor(area)"
-      (scroll)="numeros.scrollTop = area.scrollTop"
-      wrap="off"
-      spellcheck="false"
-      aria-label="Contenido del documento"
-    ></textarea>
+
+    @if (mostrarComentarios()) {
+      <aside class="comentarios" aria-label="Comentarios">
+        <h2>Comentarios</h2>
+        @if (comentarios().length) {
+          <ul>
+            @for (c of comentarios(); track c._id) {
+              <li>
+                <div class="comentario-cabecera">
+                  <strong>{{ c.usuarioNombre }}</strong>
+                  <small>{{ c.fecha | date: 'dd/MM/yyyy HH:mm' }}</small>
+                </div>
+                <p>{{ c.texto }}</p>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="sin-comentarios">Todavía no hay comentarios.</p>
+        }
+
+        @if (puedeComentar()) {
+          <form class="nuevo-comentario" (submit)="$event.preventDefault(); comentar(nuevo)">
+            <textarea
+              #nuevo
+              rows="3"
+              maxlength="1000"
+              placeholder="Escribe un comentario…"
+              aria-label="Nuevo comentario"
+            ></textarea>
+            <button type="submit" class="boton boton-navy" [disabled]="comentando()">
+              {{ comentando() ? 'Enviando…' : 'Comentar' }}
+            </button>
+          </form>
+        } @else {
+          <p class="sin-comentarios">Tu permiso es de solo lectura, no puedes comentar.</p>
+        }
+      </aside>
+    }
   </div>
 
   <footer class="estado">
-    <span>{{ doc.extension === 'md' ? 'Markdown' : 'Texto plano' }}</span>
+    <span>
+      {{ doc.extension === 'md' ? 'Markdown' : 'Texto plano' }}{{ puedeEditar() ? '' : ' · Solo lectura' }}
+    </span>
     <span>Ln {{ linea() }}, Col {{ columna() }}</span>
   </footer>
 }

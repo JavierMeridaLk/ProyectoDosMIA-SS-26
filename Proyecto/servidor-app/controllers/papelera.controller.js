@@ -3,6 +3,7 @@ import Carpeta from "../models/Carpeta.js";
 import Documento from "../models/Documento.js";
 import { buscarCarpetaPropia } from "../services/carpetas.service.js";
 import { eliminarDeGridFS } from "../services/gridfs.service.js";
+import Comparticion from "../models/Comparticion.js";
 
 
 const FUERA_DE_PAPELERA = { enPapelera: false, fecha: null, origenId: null }
@@ -171,6 +172,7 @@ export const eliminarDefinitivo = async (req, res) => {
 
     if (tipo === "documentos") {
         await Documento.deleteOne({ _id: elemento._id })
+        await Comparticion.deleteMany({ recursoId: elemento._id })
         await eliminarDeGridFS(elemento.gridfsId)
         return res.json({ eliminados: 1 })
     }
@@ -178,6 +180,12 @@ export const eliminarDefinitivo = async (req, res) => {
     //Carpeta se borra junto con todo lo que se fue a la papelera con ella
     const deLaCarpeta = { "eliminacion.origenId": elemento._id, propietarioId: req.usuario._id }
     const documentos = await Documento.find(deLaCarpeta, { gridfsId: 1 })
+    const subcarpetas = await Carpeta.find(deLaCarpeta, { _id: 1 })
+
+    //se retiran las comparticiones de todo lo que se borra
+    await Comparticion.deleteMany({
+        recursoId: { $in: [elemento._id, ...subcarpetas.map((c) => c._id), ...documentos.map((d) => d._id)] }
+    })
 
     await Documento.deleteMany({ _id: { $in: documentos.map((d) => d._id) } })
     await Promise.all(documentos.map((d) => eliminarDeGridFS(d.gridfsId)))
