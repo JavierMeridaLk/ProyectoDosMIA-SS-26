@@ -12,26 +12,26 @@ import {
 import { HttpErrorResponse } from '@angular/common/http';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import { Documento, Extension } from '../../../core/models/documento.model';
-import { DocumentosService } from '../../../core/services/documentos.service';
+import { Carpeta } from '../../../core/models/carpeta.model';
+import { CarpetasService } from '../../../core/services/carpetas.service';
 import { mensajeDeError } from '../../../core/mensaje-error';
 import { Icono } from '../../../shared/icono/icono';
 
 @Component({
-  selector: 'app-nuevo-documento',
+  selector: 'app-nueva-carpeta',
   imports: [ReactiveFormsModule, Icono],
-  templateUrl: './nuevo-documento.html',
-  styleUrl: '../dialogo.css',
+  templateUrl: './nueva-carpeta.html',
+  styleUrl: '../../../shared/dialogo.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '(document:keydown.escape)': 'cerrar.emit()' },
 })
-export class NuevoDocumento {
+export class NuevaCarpeta {
   private readonly fb = inject(NonNullableFormBuilder);
-  private readonly documentos = inject(DocumentosService);
+  private readonly carpetas = inject(CarpetasService);
 
   // Carpeta donde se crea, null = raiz
-  readonly carpetaId = input<string | null>(null);
-  readonly creado = output<Documento>();
+  readonly padreId = input<string | null>(null);
+  readonly creada = output<Carpeta>();
   readonly cerrar = output<void>();
 
   protected readonly cargando = signal(false);
@@ -41,7 +41,6 @@ export class NuevoDocumento {
 
   protected readonly form = this.fb.group({
     nombre: ['', [Validators.required, Validators.maxLength(100), Validators.pattern(/^[^\\/]+$/)]],
-    extension: ['txt' as Extension],
   });
 
   constructor() {
@@ -53,12 +52,11 @@ export class NuevoDocumento {
       this.form.markAllAsTouched();
       return;
     }
-    const { nombre, extension } = this.form.getRawValue();
     this.cargando.set(true);
     this.error.set(null);
 
-    this.documentos.crear(nombre.trim(), extension, this.carpetaId()).subscribe({
-      next: (documento) => this.creado.emit(documento),
+    this.carpetas.crear(this.form.getRawValue().nombre.trim(), this.padreId()).subscribe({
+      next: (carpeta) => this.creada.emit(carpeta),
       error: (err: HttpErrorResponse) => {
         this.error.set(mensajeDeError(err));
         this.cargando.set(false);

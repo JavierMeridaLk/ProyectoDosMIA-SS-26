@@ -1,188 +1,86 @@
-<header class="barra">
-  <div class="marca">
-    <img src="logo.svg" alt="" width="30" height="30" />
-    <span>Gestor de Archivos</span>
-  </div>
+<!-- Barra de navegacion: Mi Unidad › antecesores › carpeta actual -->
+<nav class="migas" aria-label="Ubicación">
+  @if (carpetaActual(); as actual) {
+    <a routerLink="/inicio">Mi Unidad</a>
+    @for (antecesor of ruta(); track antecesor._id) {
+      <span class="separador" aria-hidden="true">›</span>
+      <a [routerLink]="['/carpetas', antecesor._id]">{{ antecesor.nombre }}</a>
+    }
+    <span class="separador" aria-hidden="true">›</span>
+    <h2 aria-current="page">{{ actual.nombre }}</h2>
+  } @else {
+    <h2 aria-current="page">Mi Unidad</h2>
+  }
+</nav>
 
-  <label class="busqueda">
-    <app-icono nombre="buscar" [tamano]="16" />
-    <input type="search" placeholder="Buscar archivos, documentos o carpetas..." />
-  </label>
-
-  <div class="acciones">
-    <div class="perfil">
-      <button
-        type="button"
-        class="avatar"
-        aria-label="Ver información de la cuenta"
-        [attr.aria-expanded]="menuAbierto()"
-        (click)="menuAbierto.set(!menuAbierto())"
-      >
-        {{ iniciales() }}
-      </button>
-
-      @if (menuAbierto() && auth.usuario(); as usuario) {
-        <div class="perfil-panel" role="dialog" aria-label="Información de la cuenta">
-          <div class="perfil-cabecera">
-            <span class="avatar avatar-grande">{{ iniciales() }}</span>
-            <div>
-              <strong>{{ usuario.user }}</strong>
-              <small>{{ usuario.correo }}</small>
-            </div>
-          </div>
-          <dl>
-            <div>
-              <dt>Rol</dt>
-              <dd>{{ usuario.rol === 'ADMIN' ? 'Administrador' : 'Usuario' }}</dd>
-            </div>
-            <div>
-              <dt>Espacio asignado</dt>
-              <dd>{{ usuario.almacenamiento | bytes }}</dd>
-            </div>
-            <div>
-              <dt>Miembro desde</dt>
-              <dd>{{ usuario.fechaCreacion | date: 'dd/MM/yyyy' }}</dd>
-            </div>
-          </dl>
-        </div>
-      }
-    </div>
-    <button
-      type="button"
-      class="icono-boton"
-      aria-label="Cerrar sesión"
-      title="Cerrar sesión"
-      (click)="auth.cerrarSesion()"
-    >
-      <app-icono nombre="salir" />
+@if (error()) {
+  <div class="alerta" role="alert">
+    <app-icono nombre="alerta" [tamano]="16" />
+    <span>{{ error() }}</span>
+    <button type="button" aria-label="Cerrar aviso" (click)="error.set(null)">
+      <app-icono nombre="cerrar" [tamano]="14" />
     </button>
   </div>
-</header>
+}
 
-<div class="contenedor">
-  <aside class="lateral">
-    <div class="crear">
-      <button type="button" class="boton boton-navy" (click)="mostrarNuevaCarpeta.set(true)">
-        <app-icono nombre="carpetaMas" [tamano]="16" /> Nueva Carpeta
-      </button>
-      <button type="button" class="boton boton-borde" (click)="mostrarNuevo.set(true)">
-        <app-icono nombre="documentoMas" [tamano]="16" /> Nuevo Documento
-      </button>
-      <button
-        type="button"
-        class="boton boton-suave"
-        [disabled]="subiendo()"
-        (click)="selectorArchivo.click()"
-      >
-        <app-icono nombre="subir" [tamano]="16" /> {{ subiendo() ? 'Subiendo…' : 'Subir Archivo' }}
-      </button>
-      <input #selectorArchivo type="file" accept=".txt,.md" hidden (change)="subir($event)" />
-    </div>
-
-    <nav class="menu">
-      <a class="activo" routerLink="/inicio"><app-icono nombre="disco" /> Mi Unidad</a>
-      <a><app-icono nombre="usuarios" /> Compartidos conmigo</a>
-      <a><app-icono nombre="papelera" /> Papelera</a>
-    </nav>
-
-    <div class="almacenamiento">
-      <div class="almacenamiento-titulo">
-        <span><app-icono nombre="nube" [tamano]="14" /> Almacenamiento</span>
-        <strong>{{ porcentajeUsado() }}%</strong>
-      </div>
-      <div
-        class="progreso"
-        role="progressbar"
-        [attr.aria-valuenow]="porcentajeUsado()"
-        aria-valuemin="0"
-        aria-valuemax="100"
-      >
-        <div [style.width.%]="porcentajeUsado()"></div>
-      </div>
-      <small>{{ usado() | bytes }} de {{ auth.usuario()?.almacenamiento | bytes }} usados</small>
-    </div>
-  </aside>
-
-  <main class="contenido">
-    <!-- Barra de navegacion: Mi Unidad › antecesores › carpeta actual -->
-    <nav class="migas" aria-label="Ubicación">
-      @if (carpetaActual(); as actual) {
-        <a routerLink="/inicio">Mi Unidad</a>
-        @for (antecesor of ruta(); track antecesor._id) {
-          <span class="separador" aria-hidden="true">›</span>
-          <a [routerLink]="['/carpetas', antecesor._id]">{{ antecesor.nombre }}</a>
-        }
-        <span class="separador" aria-hidden="true">›</span>
-        <h2 aria-current="page">{{ actual.nombre }}</h2>
-      } @else {
-        <h2 aria-current="page">Mi Unidad</h2>
-      }
-    </nav>
-
-    @if (error()) {
-      <div class="alerta" role="alert">
-        <app-icono nombre="alerta" [tamano]="16" />
-        <span>{{ error() }}</span>
-        <button type="button" aria-label="Cerrar aviso" (click)="error.set(null)">
-          <app-icono nombre="cerrar" [tamano]="14" />
+@if (cargando()) {
+  <p class="cargando">Cargando…</p>
+} @else if (!vacia()) {
+  <div class="tarjetas">
+    @for (carpeta of carpetas(); track carpeta._id) {
+      <div class="tarjeta">
+        <button
+          type="button"
+          class="tarjeta-abrir"
+          [title]="carpeta.nombre"
+          (click)="abrirCarpeta(carpeta)"
+        >
+          <img class="tarjeta-carpeta" src="logo.svg" alt="" width="52" height="52" />
+          <span class="tarjeta-nombre">{{ carpeta.nombre }}</span>
+          <small>Carpeta</small>
+        </button>
+        <button
+          type="button"
+          class="tarjeta-eliminar"
+          title="Mover a la papelera"
+          [attr.aria-label]="'Mover ' + carpeta.nombre + ' a la papelera'"
+          (click)="eliminarCarpeta(carpeta)"
+        >
+          <app-icono nombre="papelera" [tamano]="15" />
         </button>
       </div>
     }
-
-    @if (cargando()) {
-      <p class="cargando">Cargando…</p>
-    } @else if (!vacia()) {
-      <div class="tarjetas">
-        @for (carpeta of carpetas(); track carpeta._id) {
-          <button
-            type="button"
-            class="tarjeta"
-            [title]="carpeta.nombre"
-            (click)="abrirCarpeta(carpeta)"
-          >
-            <img class="tarjeta-carpeta" src="logo.svg" alt="" width="52" height="52" />
-            <span class="tarjeta-nombre">{{ carpeta.nombre }}</span>
-            <small>Carpeta</small>
-          </button>
-        }
-        @for (doc of documentos(); track doc._id) {
-          <button
-            type="button"
-            class="tarjeta"
-            [title]="doc.nombre + '.' + doc.extension"
-            (click)="abrir(doc)"
-          >
-            <span class="tarjeta-icono"><app-icono nombre="archivo" [tamano]="26" /></span>
-            <span class="tarjeta-nombre">{{ doc.nombre }}.{{ doc.extension }}</span>
-            <small><span class="ext">{{ doc.extension }}</span> · {{ doc.tamano | bytes }}</small>
-          </button>
-        }
-      </div>
-    } @else if (!error()) {
-      <div class="vacio">
-        <app-icono nombre="carpeta" [tamano]="44" />
-        @if (carpetaActual()) {
-          <h3>Esta carpeta está vacía</h3>
-        } @else {
-          <h3>Bienvenido, {{ auth.usuario()?.user }}</h3>
-        }
+    @for (doc of documentos(); track doc._id) {
+      <div class="tarjeta">
+        <button
+          type="button"
+          class="tarjeta-abrir"
+          [title]="doc.nombre + '.' + doc.extension"
+          (click)="abrir(doc)"
+        >
+          <span class="tarjeta-icono"><app-icono nombre="archivo" [tamano]="26" /></span>
+          <span class="tarjeta-nombre">{{ doc.nombre }}.{{ doc.extension }}</span>
+          <small><span class="ext">{{ doc.extension }}</span> · {{ doc.tamano | bytes }}</small>
+        </button>
+        <button
+          type="button"
+          class="tarjeta-eliminar"
+          title="Mover a la papelera"
+          [attr.aria-label]="'Mover ' + doc.nombre + '.' + doc.extension + ' a la papelera'"
+          (click)="eliminarDocumento(doc)"
+        >
+          <app-icono nombre="papelera" [tamano]="15" />
+        </button>
       </div>
     }
-  </main>
-</div>
-
-@if (mostrarNuevo()) {
-  <app-nuevo-documento
-    [carpetaId]="id() ?? null"
-    (creado)="alCrear($event)"
-    (cerrar)="mostrarNuevo.set(false)"
-  />
-}
-
-@if (mostrarNuevaCarpeta()) {
-  <app-nueva-carpeta
-    [padreId]="id() ?? null"
-    (creada)="alCrearCarpeta()"
-    (cerrar)="mostrarNuevaCarpeta.set(false)"
-  />
+  </div>
+} @else if (!error()) {
+  <div class="vacio">
+    <app-icono nombre="carpeta" [tamano]="44" />
+    @if (carpetaActual()) {
+      <h3>Esta carpeta está vacía</h3>
+    } @else {
+      <h3>Bienvenido, {{ auth.usuario()?.user }}</h3>
+    }
+  </div>
 }

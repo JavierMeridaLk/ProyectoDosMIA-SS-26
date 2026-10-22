@@ -9,6 +9,7 @@ import {
 } from "../controllers/documentos.controller.js";
 import { verificarToken } from "../middlewares/auth.js";
 import { recibirArchivo } from "../middlewares/subida.js";
+import { enviarDocumentoAPapelera } from "../controllers/papelera.controller.js";
 
 const router = Router()
 
@@ -20,5 +21,6 @@ router.post("/subir", recibirArchivo, subir)
 router.get("/:id", obtener)
 router.put("/:id/contenido", guardarContenido)
 router.get("/:id/descargar", descargar)
+router.delete("/:id", enviarDocumentoAPapelera)
 
 export default router

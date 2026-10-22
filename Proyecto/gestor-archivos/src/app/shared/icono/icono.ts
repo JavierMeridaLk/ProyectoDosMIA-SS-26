@@ -78,6 +78,7 @@ const ICONOS = {
   descargar: ['M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4', 'm7 10 5 5 5-5', 'M12 15V3'],
   volver: ['m12 19-7-7 7-7', 'M19 12H5'],
   cerrar: ['M18 6 6 18', 'm6 6 12 12'],
+  restaurar: ['M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8', 'M3 3v5h5'],
 };
 
 export type NombreIcono = keyof typeof ICONOS;

@@ -56,4 +56,9 @@ export class DocumentosService {
       }),
     );
   }
+
+  // Lo mueve a la papelera (no lo borra)
+  eliminar(id: string) {
+    return this.http.delete(`${this.url}/${id}`);
+  }
 }

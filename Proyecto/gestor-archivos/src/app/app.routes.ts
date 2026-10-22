@@ -11,16 +11,27 @@ export const routes: Routes = [
     title: 'Iniciar sesión · Gestor de Archivos',
   },
   {
-    path: 'inicio',
+  
+    path: '',
     canActivate: [authGuard],
-    loadComponent: () => import('./pages/inicio/inicio').then((m) => m.Inicio),
-    title: 'Mi Unidad · Gestor de Archivos',
-  },
-  {
-    path: 'carpetas/:id',
-    canActivate: [authGuard],
-    loadComponent: () => import('./pages/inicio/inicio').then((m) => m.Inicio),
-    title: 'Carpeta · Gestor de Archivos',
+    loadComponent: () => import('./pages/layout/layout').then((m) => m.Layout),
+    children: [
+      {
+        path: 'inicio',
+        loadComponent: () => import('./pages/inicio/inicio').then((m) => m.Inicio),
+        title: 'Mi Unidad · Gestor de Archivos',
+      },
+      {
+        path: 'carpetas/:id',
+        loadComponent: () => import('./pages/inicio/inicio').then((m) => m.Inicio),
+        title: 'Carpeta · Gestor de Archivos',
+      },
+      {
+        path: 'papelera',
+        loadComponent: () => import('./pages/papelera/papelera').then((m) => m.Papelera),
+        title: 'Papelera · Gestor de Archivos',
+      },
+    ],
   },
   {
     path: 'documentos/:id',

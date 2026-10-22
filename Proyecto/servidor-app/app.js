@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth.routes.js";
 import usuariosRoutes from "./routes/usuarios.routes.js";
 import documentosRoutes from "./routes/documentos.routes.js";
 import carpetasRoutes from "./routes/carpetas.routes.js";
+import papeleraRoutes from "./routes/papelera.routes.js";
 
 //Instancia dse nuestra aplicacion
 const app = express()
@@ -24,6 +25,7 @@ app.use("/api/auth", authRoutes)
 app.use("/api/usuarios", usuariosRoutes)
 app.use("/api/documentos", documentosRoutes)
 app.use("/api/carpetas", carpetasRoutes)
+app.use("/api/papelera", papeleraRoutes)
 
 //Cualquier error no controlado responde en JSON
 app.use((error, req, res, next) => {

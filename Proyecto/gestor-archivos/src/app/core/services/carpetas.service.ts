@@ -20,4 +20,9 @@ export class CarpetasService {
       .post<{ carpeta: Carpeta }>(this.url, { nombre, padreId })
       .pipe(map((r) => r.carpeta));
   }
+
+  // La mueve a la papelera junto con todo su contenido
+  eliminar(id: string) {
+    return this.http.delete(`${this.url}/${id}`);
+  }
 }

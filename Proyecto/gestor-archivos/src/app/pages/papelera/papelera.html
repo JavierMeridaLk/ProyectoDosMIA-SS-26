@@ -1,0 +1,71 @@
+<div class="cabecera">
+  <h2>Papelera</h2>
+  <p>Para ver el contenido de un elemento primero restáuralo. Volverá a la ubicación que tenía.</p>
+</div>
+
+@if (error()) {
+  <div class="alerta" role="alert">
+    <app-icono nombre="alerta" [tamano]="16" />
+    <span>{{ error() }}</span>
+  </div>
+}
+
+@if (cargando()) {
+  <p class="cargando">Cargando…</p>
+} @else if (elementos().length) {
+  <ul class="lista">
+    @for (elemento of elementos(); track elemento._id) {
+      <li class="fila">
+        @if (elemento.tipo === 'carpetas') {
+          <img class="icono-carpeta" src="logo.svg" alt="" width="36" height="36" />
+        } @else {
+          <span class="icono-documento"><app-icono nombre="archivo" [tamano]="20" /></span>
+        }
+
+        <div class="datos">
+          <strong [title]="elemento.nombre">{{ elemento.nombre }}</strong>
+          <small>
+            {{ elemento.tipo === 'carpetas' ? 'Carpeta' : (elemento.tamano | bytes) }}
+            · Ubicación original: {{ elemento.ubicacion }}
+            · Eliminado el {{ elemento.fecha | date: 'dd/MM/yyyy HH:mm' }}
+          </small>
+        </div>
+
+        <div class="acciones">
+          <button
+            type="button"
+            class="boton boton-restaurar"
+            [disabled]="procesandoId() === elemento._id"
+            (click)="restaurar(elemento)"
+          >
+            <app-icono nombre="restaurar" [tamano]="15" /> Restaurar
+          </button>
+          <button
+            type="button"
+            class="boton boton-eliminar"
+            [disabled]="procesandoId() === elemento._id"
+            (click)="porEliminar.set(elemento)"
+          >
+            <app-icono nombre="papelera" [tamano]="15" /> Eliminar definitivamente
+          </button>
+        </div>
+      </li>
+    }
+  </ul>
+} @else if (!error()) {
+  <div class="vacio">
+    <app-icono nombre="papelera" [tamano]="44" />
+    <h3>La papelera está vacía</h3>
+  </div>
+}
+
+@if (porEliminar(); as elemento) {
+  <app-confirmacion
+    titulo="¿Eliminar definitivamente?"
+    [mensaje]="mensajeConfirmacion(elemento)"
+    textoConfirmar="Eliminar definitivamente"
+    [procesando]="eliminando()"
+    (confirmar)="confirmarEliminacion()"
+    (cancelar)="porEliminar.set(null)"
+  />
+}

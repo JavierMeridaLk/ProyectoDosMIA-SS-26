@@ -184,3 +184,27 @@ footer {
 .boton-borde:hover {
   background: var(--beige);
 }
+
+.cuerpo {
+  padding: 14px 20px 20px;
+}
+
+.cuerpo p {
+  margin: 0 0 18px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--texto-suave);
+}
+
+.boton-peligro {
+  background: var(--error);
+  color: var(--blanco);
+}
+
+.boton-peligro:hover {
+  filter: brightness(1.1);
+}
+
+.boton-peligro:disabled {
+  opacity: 0.7;
+}
