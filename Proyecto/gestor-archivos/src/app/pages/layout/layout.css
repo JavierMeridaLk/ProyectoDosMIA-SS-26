@@ -244,6 +244,15 @@ button.avatar[aria-expanded='true'] {
   cursor: pointer;
 }
 
+.menu .seccion {
+  margin: 14px 12px 4px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9aabb8;
+}
+
 .menu a:hover {
   background: var(--beige);
   color: var(--navy);

@@ -1,0 +1,49 @@
+<div class="fondo" (click)="cerrar.emit()">
+  <section
+    class="dialogo"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titulo-renombrar"
+    (click)="$event.stopPropagation()"
+  >
+    <header>
+      <h2 id="titulo-renombrar">Renombrar</h2>
+      <button type="button" class="cerrar" aria-label="Cerrar" (click)="cerrar.emit()">
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <form (submit)="$event.preventDefault(); guardar(campo.value)">
+      @if (error()) {
+        <div class="alerta" role="alert">
+          <app-icono nombre="alerta" [tamano]="16" />
+          <span>{{ error() }}</span>
+        </div>
+      }
+
+      <div class="campo">
+        <label for="nuevo-nombre-recurso">Nuevo nombre</label>
+        <div class="control">
+          <input
+            #campo
+            id="nuevo-nombre-recurso"
+            maxlength="100"
+            autocomplete="off"
+            [value]="seleccion().nombre"
+          />
+          @if (seleccion().extension) {
+            <!-- La extension no se puede cambiar -->
+            <span class="sufijo">.{{ seleccion().extension }}</span>
+          }
+        </div>
+      </div>
+
+      <footer>
+        <button type="button" class="boton boton-borde" (click)="cerrar.emit()">Cancelar</button>
+        <button type="submit" class="boton boton-navy" [disabled]="guardando()">
+          {{ guardando() ? 'Guardando…' : 'Guardar' }}
+        </button>
+      </footer>
+    </form>
+  </section>
+</div>

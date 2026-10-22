@@ -10,6 +10,11 @@ export interface Usuario {
   fechaCreacion: string;
 }
 
+export interface UsuarioAdmin extends Usuario {
+  usado: number;
+  documentos: number;
+}
+
 export interface LoginDatos {
   user: string;
   contrasena: string;

@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-import { authGuard, invitadoGuard } from './core/guards/auth.guard';
+import { adminGuard, authGuard, invitadoGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'inicio' },
@@ -35,6 +35,27 @@ export const routes: Routes = [
         path: 'compartidos',
         loadComponent: () => import('./pages/compartidos/compartidos').then((m) => m.Compartidos),
         title: 'Compartidos conmigo · Gestor de Archivos',
+      },
+      {
+        path: 'admin',
+        canActivate: [adminGuard],
+        children: [
+          {
+            path: 'usuarios',
+            loadComponent: () => import('./pages/admin/usuarios/usuarios').then((m) => m.Usuarios),
+            title: 'Usuarios · Gestor de Archivos',
+          },
+          {
+            path: 'logs',
+            loadComponent: () => import('./pages/admin/logs/logs').then((m) => m.Logs),
+            title: 'Logs · Gestor de Archivos',
+          },
+          {
+            path: 'reportes',
+            loadComponent: () => import('./pages/admin/reportes/reportes').then((m) => m.Reportes),
+            title: 'Reportes · Gestor de Archivos',
+          },
+        ],
       },
       {
         path: 'buscar',

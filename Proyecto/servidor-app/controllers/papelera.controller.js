@@ -4,6 +4,7 @@ import Documento from "../models/Documento.js";
 import { buscarCarpetaPropia } from "../services/carpetas.service.js";
 import { eliminarDeGridFS } from "../services/gridfs.service.js";
 import Comparticion from "../models/Comparticion.js";
+import { registrar, recursoDe, ACCIONES } from "../services/actividad.service.js";
 
 
 const FUERA_DE_PAPELERA = { enPapelera: false, fecha: null, origenId: null }
@@ -49,6 +50,7 @@ export const enviarDocumentoAPapelera = async (req, res) => {
     if (!documento) {
         return res.status(404).json({ mensaje: "Documento no encontrado" })
     }
+    await registrar(req.usuario, ACCIONES.ELIMINAR, recursoDe.documento(documento))
     res.json({ documento })
 }
 
@@ -72,6 +74,7 @@ export const enviarCarpetaAPapelera = async (req, res) => {
 
     carpeta.eliminacion = { enPapelera: true, fecha, origenId: null }
     await carpeta.save()
+    await registrar(req.usuario, ACCIONES.ELIMINAR, recursoDe.carpeta(carpeta), `Con ${idsSubcarpetas.length} subcarpetas`)
 
     res.json({ carpeta })
 }
@@ -155,6 +158,8 @@ export const restaurar = async (req, res) => {
         ? await restaurarCarpeta(elemento, req.usuario)
         : await restaurarDocumento(elemento, req.usuario)
 
+    const recurso = tipo === "carpetas" ? recursoDe.carpeta(elemento) : recursoDe.documento(elemento)
+    await registrar(req.usuario, ACCIONES.RESTAURAR, recurso, `Restaurado en ${ubicacion}`)
     res.json({ ubicacion })
 }
 
@@ -174,6 +179,7 @@ export const eliminarDefinitivo = async (req, res) => {
         await Documento.deleteOne({ _id: elemento._id })
         await Comparticion.deleteMany({ recursoId: elemento._id })
         await eliminarDeGridFS(elemento.gridfsId)
+        await registrar(req.usuario, ACCIONES.ELIMINAR_DEFINITIVO, recursoDe.documento(elemento))
         return res.json({ eliminados: 1 })
     }
 
@@ -190,6 +196,8 @@ export const eliminarDefinitivo = async (req, res) => {
     await Documento.deleteMany({ _id: { $in: documentos.map((d) => d._id) } })
     await Promise.all(documentos.map((d) => eliminarDeGridFS(d.gridfsId)))
     const { deletedCount } = await Carpeta.deleteMany({ $or: [{ _id: elemento._id }, deLaCarpeta] })
+    await registrar(req.usuario, ACCIONES.ELIMINAR_DEFINITIVO, recursoDe.carpeta(elemento),
+        `${deletedCount - 1} subcarpetas y ${documentos.length} documentos`)
 
     res.json({ eliminados: deletedCount + documentos.length })
 }

@@ -1,0 +1,66 @@
+<div class="fondo" (click)="cerrar.emit()">
+  <section
+    class="dialogo dialogo-ancho"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titulo-mover"
+    (click)="$event.stopPropagation()"
+  >
+    <header>
+      <h2 id="titulo-mover">Mover «{{ nombre() }}»</h2>
+      <button type="button" class="cerrar" aria-label="Cerrar" (click)="cerrar.emit()">
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <div class="cuerpo">
+      <p class="indicacion">Elige la carpeta destino:</p>
+
+      @if (cargando()) {
+        <p class="indicacion">Cargando carpetas…</p>
+      } @else {
+        <ul class="destinos" role="listbox" aria-label="Carpeta destino">
+          @for (destino of destinos(); track destino.id) {
+            <li>
+              <button
+                type="button"
+                role="option"
+                [attr.aria-selected]="elegido()?.id === destino.id"
+                [class.elegido]="elegido()?.id === destino.id"
+                [disabled]="!destino.permitido"
+                [style.padding-left.px]="12 + destino.nivel * 18"
+                (click)="elegido.set(destino)"
+              >
+                @if (destino.id === null) {
+                  <app-icono nombre="disco" [tamano]="16" />
+                } @else {
+                  <app-icono nombre="carpeta" [tamano]="16" />
+                }
+                <span>{{ destino.nombre }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+
+      @if (error()) {
+        <div class="alerta" role="alert">
+          <app-icono nombre="alerta" [tamano]="16" />
+          <span>{{ error() }}</span>
+        </div>
+      }
+
+      <footer>
+        <button type="button" class="boton boton-borde" (click)="cerrar.emit()">Cancelar</button>
+        <button
+          type="button"
+          class="boton boton-navy"
+          [disabled]="!elegido() || moviendo()"
+          (click)="mover()"
+        >
+          {{ moviendo() ? 'Moviendo…' : 'Mover aquí' }}
+        </button>
+      </footer>
+    </div>
+  </section>
+</div>

@@ -23,14 +23,21 @@ import { mensajeDeError } from '../../core/mensaje-error';
 import { Icono } from '../../shared/icono/icono';
 import { BytesPipe } from '../../shared/pipes/bytes.pipe';
 import { Compartir } from './compartir/compartir';
+import { Renombrar } from './renombrar/renombrar';
+import { Mover } from './mover/mover';
+import { nombreCompleto, Seleccion } from './seleccion';
 
 // Contenido de Mi Unidad o de una carpeta (/inicio y /carpetas/:id)
 @Component({
   selector: 'app-inicio',
-  imports: [Icono, BytesPipe, RouterLink, Compartir],
+  imports: [Icono, BytesPipe, RouterLink, Compartir, Renombrar, Mover],
   templateUrl: './inicio.html',
   styleUrl: './inicio.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:click)': 'cerrarMenuSiEsFuera($event)',
+    '(document:keydown.escape)': 'menuAbierto.set(null)',
+  },
 })
 export class Inicio {
   protected readonly auth = inject(AuthService);
@@ -55,8 +62,13 @@ export class Inicio {
   protected readonly permiso = signal<PermisoEfectivo>('PROPIETARIO');
   protected readonly etiquetas = ETIQUETAS_PERMISO;
 
-  // Recurso que se esta compartiendo (abre el dialogo)
-  protected readonly compartiendo = signal<{ tipo: TipoRecurso; id: string; nombre: string } | null>(null);
+  // Id del elemento con el menu de acciones abierto
+  protected readonly menuAbierto = signal<string | null>(null);
+  // Elemento sobre el que se abrio cada dialogo
+  protected readonly compartiendo = signal<Seleccion | null>(null);
+  protected readonly renombrando = signal<Seleccion | null>(null);
+  protected readonly moviendo = signal<Seleccion | null>(null);
+  protected readonly nombreCompleto = nombreCompleto;
 
   protected readonly vacia = computed(
     () => !this.carpetas().length && !this.documentos().length,
@@ -77,12 +89,43 @@ export class Inicio {
     this.router.navigate(['/documentos', documento._id]);
   }
 
+  // Datos que necesitan los dialogos de renombrar, mover y compartir
+  protected seleccionDe(tipo: TipoRecurso, elemento: Carpeta | Documento): Seleccion {
+    return 'extension' in elemento
+      ? { tipo, id: elemento._id, nombre: elemento.nombre, extension: elemento.extension, padreId: elemento.carpetaId }
+      : { tipo, id: elemento._id, nombre: elemento.nombre, extension: null, padreId: elemento.padreId };
+  }
+
+  protected abrirDialogo(dialogo: 'renombrar' | 'mover' | 'compartir', seleccion: Seleccion) {
+    this.menuAbierto.set(null);
+    ({ renombrar: this.renombrando, mover: this.moviendo, compartir: this.compartiendo })[dialogo].set(seleccion);
+  }
+
+  protected alRenombrar(nuevoNombre: string) {
+    this.renombrando.set(null);
+    this.unidad.avisar(`Ahora se llama «${nuevoNombre}»`);
+    this.cargarContenido(this.id() ?? null);
+  }
+
+  protected alMover(seleccion: Seleccion, destino: string) {
+    this.moviendo.set(null);
+    this.unidad.avisar(`«${nombreCompleto(seleccion)}» se movió a ${destino}`);
+    this.cargarContenido(this.id() ?? null);
+  }
+
+  protected cerrarMenuSiEsFuera(evento: MouseEvent) {
+    if (this.menuAbierto() && !(evento.target as Element).closest('.tarjeta-acciones')) {
+      this.menuAbierto.set(null);
+    }
+  }
+
   protected abrirCarpeta(carpeta: Carpeta) {
     this.router.navigate(['/carpetas', carpeta._id]);
   }
 
   // Mover a la papelera no pide confirmacion porque se puede restaurar
   protected eliminarCarpeta(carpeta: Carpeta) {
+    this.menuAbierto.set(null);
     this.carpetasService.eliminar(carpeta._id).subscribe({
       next: () => {
         this.carpetas.update((lista) => lista.filter((c) => c._id !== carpeta._id));
@@ -93,6 +136,7 @@ export class Inicio {
   }
 
   protected eliminarDocumento(documento: Documento) {
+    this.menuAbierto.set(null);
     this.documentosService.eliminar(documento._id).subscribe({
       next: () => {
         this.documentos.update((lista) => lista.filter((d) => d._id !== documento._id));

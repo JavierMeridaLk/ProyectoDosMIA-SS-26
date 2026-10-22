@@ -1,0 +1,99 @@
+:host {
+  display: block;
+}
+
+.cabecera {
+  margin-bottom: 16px;
+}
+
+.cabecera h2 {
+  margin: 0;
+  padding: 2px 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.cabecera p {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+}
+
+/* Filtros */
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.filtro {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filtro label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.filtro select,
+.filtro input {
+  height: 36px;
+  padding: 0 10px;
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: var(--navy);
+}
+
+.alerta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--fondo-error);
+  color: var(--error);
+  font-size: 0.8rem;
+}
+
+.cargando {
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+}
+
+.mas {
+  display: block;
+  margin: 16px auto 0;
+  padding: 8px 18px;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  background: var(--blanco);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.mas:hover:not(:disabled) {
+  background: var(--beige);
+}
+
+.vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: 60px;
+  color: var(--teal);
+}
+
+.vacio h3 {
+  margin: 14px 0 0;
+  font-size: 1rem;
+  color: var(--navy);
+}

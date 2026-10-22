@@ -1,0 +1,76 @@
+<div class="cabecera">
+  <h2>Logs del sistema</h2>
+  <p>Todas las operaciones realizadas por los usuarios: quién, qué hizo, sobre qué recurso y cuándo.</p>
+</div>
+
+<div class="filtros">
+  <div class="filtro">
+    <label for="log-usuario">Usuario</label>
+    <input
+      id="log-usuario"
+      type="search"
+      placeholder="Nombre de usuario"
+      (change)="filtrar('usuario', $any($event.target).value)"
+    />
+  </div>
+  <div class="filtro">
+    <label for="log-accion">Acción</label>
+    <select id="log-accion" (change)="filtrar('accion', $any($event.target).value)">
+      <option value="">Todas</option>
+      @for (a of acciones | keyvalue: sinOrden; track a.key) {
+        <option [value]="a.key">{{ a.value }}</option>
+      }
+    </select>
+  </div>
+  <div class="filtro">
+    <label for="log-tipo">Recurso</label>
+    <select id="log-tipo" (change)="filtrar('tipo', $any($event.target).value)">
+      <option value="">Todos</option>
+      <option value="DOCUMENTO">Documentos</option>
+      <option value="CARPETA">Carpetas</option>
+      <option value="USUARIO">Usuarios</option>
+    </select>
+  </div>
+  <div class="filtro">
+    <label for="log-desde">Desde</label>
+    <input
+      id="log-desde"
+      type="date"
+      [max]="filtros().hasta || null"
+      (change)="filtrar('desde', $any($event.target).value)"
+    />
+  </div>
+  <div class="filtro">
+    <label for="log-hasta">Hasta</label>
+    <input
+      id="log-hasta"
+      type="date"
+      [min]="filtros().desde || null"
+      (change)="filtrar('hasta', $any($event.target).value)"
+    />
+  </div>
+</div>
+
+@if (error()) {
+  <div class="alerta" role="alert">
+    <app-icono nombre="alerta" [tamano]="16" />
+    <span>{{ error() }}</span>
+  </div>
+}
+
+@if (registros().length) {
+  <app-lista-actividad [registros]="registros()" />
+
+  @if (hayMas()) {
+    <button type="button" class="mas" [disabled]="cargando()" (click)="cargarMas()">
+      {{ cargando() ? 'Cargando…' : 'Cargar más' }}
+    </button>
+  }
+} @else if (cargando()) {
+  <p class="cargando">Cargando…</p>
+} @else if (!error()) {
+  <div class="vacio">
+    <app-icono nombre="actividad" [tamano]="44" />
+    <h3>No hay registros con estos filtros</h3>
+  </div>
+}

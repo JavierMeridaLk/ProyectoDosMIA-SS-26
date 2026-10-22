@@ -5,6 +5,7 @@ import Carpeta from "../models/Carpeta.js";
 import Usuario from "../models/Usuario.js";
 import { PERMISOS } from "../services/permisos.service.js";
 import { contiene } from "../services/texto.service.js";
+import { registrar, recursoDe, ACCIONES } from "../services/actividad.service.js";
 
 const TIPOS = {
     documentos: { modelo: Documento, tipoRecurso: "DOCUMENTO" },
@@ -20,7 +21,22 @@ const buscarRecursoPropio = (tipo, id, usuario) => {
         _id: id,
         propietarioId: usuario._id,
         "eliminacion.enPapelera": false
-    }, { nombre: 1, extension: 1 })
+    }, { nombre: 1, extension: 1, propietarioId: 1 })
+}
+
+const recursoComoLog = (tipo, recurso) =>
+    tipo === "documentos" ? recursoDe.documento(recurso) : recursoDe.carpeta(recurso)
+
+//cambio d permiso, retiro o comparticion de un recurso propio
+const registrarSobreComparticion = async (usuario, accion, comparticion, extra = "") => {
+    const tipo = comparticion.tipoRecurso === "DOCUMENTO" ? "documentos" : "carpetas"
+    const [recurso, afectado] = await Promise.all([
+        TIPOS[tipo].modelo.findById(comparticion.recursoId, { nombre: 1, extension: 1, propietarioId: 1 }).lean(),
+        Usuario.findById(comparticion.usuarioId, { user: 1 }).lean()
+    ])
+    if (!recurso) return
+    const detalle = [`Con ${afectado?.user ?? "usuario eliminado"}`, extra].filter(Boolean).join(" · ")
+    await registrar(usuario, accion, recursoComoLog(tipo, recurso), detalle)
 }
 
 const conUsuario = (comparticion, usuarios) => {
@@ -98,6 +114,7 @@ export const compartir = async (req, res) => {
                 { upsert: true, returnDocument: "after" }
             ).lean()
             compartidas.push(conUsuario(comparticion, [usuario]))
+            await registrar(req.usuario, ACCIONES.COMPARTIR, recursoComoLog(tipo, recurso), `Con ${usuario.user} · ${permiso}`)
         }
     }
 
@@ -127,6 +144,7 @@ export const cambiarPermiso = async (req, res) => {
     if (!comparticion) {
         return res.status(404).json({ mensaje: "Compartición no encontrada" })
     }
+    await registrarSobreComparticion(req.usuario, ACCIONES.CAMBIAR_PERMISO, comparticion, `Nuevo permiso: ${permiso}`)
     res.json({ comparticion })
 }
 
@@ -135,10 +153,11 @@ export const retirar = async (req, res) => {
         return res.status(404).json({ mensaje: "Compartición no encontrada" })
     }
 
-    const { deletedCount } = await Comparticion.deleteOne({ _id: req.params.id, propietarioId: req.usuario._id })
-    if (!deletedCount) {
+    const comparticion = await Comparticion.findOneAndDelete({ _id: req.params.id, propietarioId: req.usuario._id })
+    if (!comparticion) {
         return res.status(404).json({ mensaje: "Compartición no encontrada" })
     }
+    await registrarSobreComparticion(req.usuario, ACCIONES.RETIRAR_PERMISO, comparticion)
     res.json({ eliminada: true })
 }
 

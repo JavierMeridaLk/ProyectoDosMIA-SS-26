@@ -61,6 +61,8 @@ export class Layout implements OnInit {
   );
 
   protected readonly enPapelera = computed(() => this.url().startsWith('/papelera'));
+  // Seccion de administracion abierta (usuarios, logs o reportes)
+  protected readonly enAdmin = (seccion: string) => this.url().startsWith(`/admin/${seccion}`);
   private readonly enBusqueda = computed(() => this.url().startsWith('/buscar'));
   // Mi Unidad o una carpeta: ahi se ve lo que se crea o sube
   protected readonly enUnidad = computed(

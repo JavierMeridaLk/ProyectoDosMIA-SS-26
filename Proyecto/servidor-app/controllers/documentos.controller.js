@@ -1,10 +1,12 @@
 import Documento from "../models/Documento.js";
+import Carpeta from "../models/Carpeta.js";
 import { guardarEnGridFS, leerDeGridFS, abrirDescargaGridFS, eliminarDeGridFS } from "../services/gridfs.service.js";
 import { TAMANO_MAXIMO } from "../middlewares/subida.js";
 import { convertirAUtf8 } from "../services/codificacion.service.js";
 import { buscarCarpetaPropia, nombreValido } from "../services/carpetas.service.js";
 import { accesoADocumento, tienePermiso } from "../services/permisos.service.js";
 import Usuario from "../models/Usuario.js";
+import { registrar, recursoDe, ACCIONES } from "../services/actividad.service.js";
 
 const EXTENSIONES = ["txt", "md"]
 
@@ -55,9 +57,9 @@ const crearDocumento = async (usuario, carpetaId, nombre, extension, buffer) => 
 
 //Valida la carpeta destino que viene en el body. null = raiz
 const carpetaDestino = async (carpetaId, usuario) => {
-    if (!carpetaId) return { valida: true, id: null }
+    if (!carpetaId) return { valida: true, id: null, nombre: "Mi Unidad" }
     const carpeta = await buscarCarpetaPropia(carpetaId, usuario)
-    return { valida: !!carpeta, id: carpeta?._id ?? null }
+    return { valida: !!carpeta, id: carpeta?._id ?? null, nombre: carpeta?.nombre }
 }
 
 export const obtenerAlmacenamiento = async (req, res) => {
@@ -91,6 +93,7 @@ export const crear = async (req, res) => {
     }
 
     const documento = await crearDocumento(req.usuario, carpeta.id, nombre.trim(), extension, buffer)
+    await registrar(req.usuario, ACCIONES.CREAR_DOCUMENTO, recursoDe.documento(documento))
     res.status(201).json({ documento })
 }
 
@@ -127,6 +130,7 @@ export const subir = async (req, res) => {
     }
 
     const documento = await crearDocumento(req.usuario, carpeta.id, nombre, extension, buffer)
+    await registrar(req.usuario, ACCIONES.SUBIR_DOCUMENTO, recursoDe.documento(documento), `Codificación original: ${convertido.codificacion}`)
     res.status(201).json({ documento, codificacionOriginal: convertido.codificacion })
 }
 
@@ -177,6 +181,7 @@ export const guardarContenido = async (req, res) => {
     documento.fechaModificacion = new Date()
     await documento.save()
     await eliminarDeGridFS(anteriorId)
+    await registrar(req.usuario, ACCIONES.EDITAR_DOCUMENTO, recursoDe.documento(documento))
 
     res.json({ documento })
 }
@@ -191,6 +196,7 @@ export const descargar = async (req, res) => {
     const nombreArchivo = encodeURIComponent(`${documento.nombre}.${documento.extension}`)
     res.setHeader("Content-Type", TIPOS_CONTENIDO[documento.extension])
     res.setHeader("Content-Disposition", `attachment; filename*=UTF-8''${nombreArchivo}`)
+    await registrar(req.usuario, ACCIONES.DESCARGAR_DOCUMENTO, recursoDe.documento(documento))
     abrirDescargaGridFS(documento.gridfsId).pipe(res)
 }
 
@@ -215,5 +221,60 @@ export const comentar = async (req, res) => {
         { $push: { comentarios: comentario } },
         { returnDocument: "after", projection: { comentarios: { $slice: -1 } } }
     )
+    await registrar(req.usuario, ACCIONES.COMENTAR, recursoDe.documento(acceso.documento), texto.slice(0, 100))
     res.status(201).json({ comentario: documento.comentarios[0] })
+}
+
+//Renombrar y mover solo los puede hacer el propietario
+const accesoDePropietario = async (req, res) => {
+    const acceso = await accesoADocumento(req.params.id, req.usuario)
+    if (!acceso) {
+        res.status(404).json({ mensaje: "Documento no encontrado" })
+        return null
+    }
+    if (acceso.permiso !== "PROPIETARIO") {
+        res.status(403).json({ mensaje: "Solo el propietario puede hacer esto" })
+        return null
+    }
+    return acceso.documento
+}
+
+export const renombrar = async (req, res) => {
+    const { nombre } = req.body
+    if (!nombreValido(nombre)) {
+        return res.status(400).json({ mensaje: "El nombre no es válido" })
+    }
+
+    const documento = await accesoDePropietario(req, res)
+    if (!documento) return
+
+    const anterior = `${documento.nombre}.${documento.extension}`
+    documento.nombre = nombre.trim()
+    await documento.save()
+    await registrar(req.usuario, ACCIONES.RENOMBRAR, recursoDe.documento(documento), `Antes: ${anterior}`)
+
+    res.json({ documento })
+}
+
+export const mover = async (req, res) => {
+    const documento = await accesoDePropietario(req, res)
+    if (!documento) return
+
+    const destino = await carpetaDestino(req.body.carpetaId, req.usuario)
+    if (!destino.valida) {
+        return res.status(404).json({ mensaje: "La carpeta destino no existe" })
+    }
+    if (String(documento.carpetaId) === String(destino.id)) {
+        return res.status(400).json({ mensaje: "El documento ya está en esa carpeta" })
+    }
+
+    const origen = documento.carpetaId
+        ? (await Carpeta.findById(documento.carpetaId, { nombre: 1 }).lean())?.nombre ?? "Mi Unidad"
+        : "Mi Unidad"
+
+    documento.carpetaId = destino.id
+    await documento.save()
+    await registrar(req.usuario, ACCIONES.MOVER, recursoDe.documento(documento), `De ${origen} a ${destino.nombre}`)
+
+    res.json({ documento })
 }

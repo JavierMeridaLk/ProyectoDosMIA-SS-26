@@ -69,7 +69,20 @@ export class DocumentosService {
       .pipe(map((r) => r.comentario));
   }
 
-  // Lo mueve a la papelera (no lo borra)
+  // Solo cambia el nombre, la extension se conserva
+  renombrar(id: string, nombre: string) {
+    return this.http
+      .patch<{ documento: Documento }>(`${this.url}/${id}/nombre`, { nombre })
+      .pipe(map((r) => r.documento));
+  }
+
+  mover(id: string, carpetaId: string | null) {
+    return this.http
+      .patch<{ documento: Documento }>(`${this.url}/${id}/mover`, { carpetaId })
+      .pipe(map((r) => r.documento));
+  }
+
+  // se mueve a la papelera 
   eliminar(id: string) {
     return this.http.delete(`${this.url}/${id}`);
   }

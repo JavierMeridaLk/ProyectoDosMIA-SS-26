@@ -11,3 +11,8 @@ export const authGuard: CanActivateFn = () => {
 export const invitadoGuard: CanActivateFn = () => {
   return !inject(AuthService).autenticado() || inject(Router).createUrlTree(['/inicio']);
 };
+
+// Paginas de administracion 
+export const adminGuard: CanActivateFn = () => {
+  return inject(AuthService).esAdmin() || inject(Router).createUrlTree(['/inicio']);
+};

@@ -6,7 +6,9 @@ import {
     obtener,
     guardarContenido,
     descargar,
-    comentar
+    comentar,
+    renombrar,
+    mover
 } from "../controllers/documentos.controller.js";
 import { verificarToken } from "../middlewares/auth.js";
 import { recibirArchivo } from "../middlewares/subida.js";
@@ -23,6 +25,8 @@ router.get("/:id", obtener)
 router.put("/:id/contenido", guardarContenido)
 router.get("/:id/descargar", descargar)
 router.post("/:id/comentarios", comentar)
+router.patch("/:id/nombre", renombrar)
+router.patch("/:id/mover", mover)
 router.delete("/:id", enviarDocumentoAPapelera)
 
 export default router

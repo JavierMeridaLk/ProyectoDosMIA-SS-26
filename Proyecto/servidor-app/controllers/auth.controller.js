@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import Usuario from "../models/Usuario.js";
+import { registrar, recursoDe, ACCIONES } from "../services/actividad.service.js";
 
 const generarToken = (usuario) => {
     return jwt.sign(
@@ -28,6 +29,7 @@ export const registro = async (req, res) => {
     try {
         //El rol y el almacenamiento no se toman del body
         const usuario = await Usuario.create({ correo, user, contrasena })
+        await registrar(usuario, ACCIONES.REGISTRO, recursoDe.usuario(usuario))
         res.status(201).json({ token: generarToken(usuario), usuario })
     } catch (error) {
         //indice unico duplicado
@@ -56,6 +58,7 @@ export const login = async (req, res) => {
             return res.status(403).json({ mensaje: "El usuario está desactivado" })
         }
 
+        await registrar(usuario, ACCIONES.INICIO_SESION, recursoDe.usuario(usuario))
         res.json({ token: generarToken(usuario), usuario })
     } catch (error) {
         res.status(500).json({ mensaje: "Error al iniciar sesión" })

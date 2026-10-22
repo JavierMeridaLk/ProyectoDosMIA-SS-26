@@ -96,6 +96,19 @@
       <a routerLink="/papelera" [class.activo]="enPapelera()">
         <app-icono nombre="papelera" /> Papelera
       </a>
+      <!-- Solo los administradores ven esta seccion -->
+      @if (auth.esAdmin()) {
+        <p class="seccion">Administración</p>
+        <a routerLink="/admin/usuarios" [class.activo]="enAdmin('usuarios')">
+          <app-icono nombre="escudo" /> Usuarios
+        </a>
+        <a routerLink="/admin/logs" [class.activo]="enAdmin('logs')">
+          <app-icono nombre="registro" /> Logs
+        </a>
+        <a routerLink="/admin/reportes" [class.activo]="enAdmin('reportes')">
+          <app-icono nombre="reportes" /> Reportes
+        </a>
+      }
     </nav>
 
     <div class="almacenamiento">

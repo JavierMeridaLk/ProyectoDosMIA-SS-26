@@ -1,0 +1,64 @@
+:host {
+  display: block;
+}
+
+/* Lista de registros */
+.lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--blanco);
+  border: 1px solid #ece4de;
+  border-radius: 12px;
+}
+
+.fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+}
+
+.fila + .fila {
+  border-top: 1px solid #f0e9e4;
+}
+
+.icono {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--beige);
+  color: var(--teal);
+}
+
+.datos {
+  flex: 1;
+  min-width: 0;
+}
+
+.datos p {
+  margin: 0;
+  font-size: 0.84rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detalle {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.74rem;
+  color: var(--texto-suave);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+time {
+  flex-shrink: 0;
+  font-size: 0.74rem;
+  color: var(--texto-suave);
+}

@@ -46,26 +46,37 @@
           <span class="tarjeta-nombre">{{ carpeta.nombre }}</span>
           <small>Carpeta</small>
         </button>
-        <!-- Solo el propietario puede compartir o eliminar -->
+        <!-- Solo el propietario puede renombrar, mover, compartir o eliminar -->
         @if (propio()) {
-          <div class="tarjeta-acciones">
+          <div class="tarjeta-acciones" [class.abierta]="menuAbierto() === carpeta._id">
             <button
               type="button"
-              title="Compartir"
-              [attr.aria-label]="'Compartir ' + carpeta.nombre"
-              (click)="compartiendo.set({ tipo: 'carpetas', id: carpeta._id, nombre: carpeta.nombre })"
+              class="boton-menu"
+              title="Más acciones"
+              aria-haspopup="menu"
+              [attr.aria-expanded]="menuAbierto() === carpeta._id"
+              [attr.aria-label]="'Acciones de ' + carpeta.nombre"
+              (click)="menuAbierto.set(menuAbierto() === carpeta._id ? null : carpeta._id)"
             >
-              <app-icono nombre="compartir" [tamano]="15" />
+              <app-icono nombre="mas" [tamano]="16" />
             </button>
-            <button
-              type="button"
-              class="eliminar"
-              title="Mover a la papelera"
-              [attr.aria-label]="'Mover ' + carpeta.nombre + ' a la papelera'"
-              (click)="eliminarCarpeta(carpeta)"
-            >
-              <app-icono nombre="papelera" [tamano]="15" />
-            </button>
+            @if (menuAbierto() === carpeta._id) {
+              @let seleccion = seleccionDe('carpetas', carpeta);
+              <div class="menu-acciones" role="menu">
+                <button type="button" role="menuitem" (click)="abrirDialogo('renombrar', seleccion)">
+                  <app-icono nombre="editar" [tamano]="15" /> Renombrar
+                </button>
+                <button type="button" role="menuitem" (click)="abrirDialogo('mover', seleccion)">
+                  <app-icono nombre="mover" [tamano]="15" /> Mover
+                </button>
+                <button type="button" role="menuitem" (click)="abrirDialogo('compartir', seleccion)">
+                  <app-icono nombre="compartir" [tamano]="15" /> Compartir
+                </button>
+                <button type="button" role="menuitem" class="eliminar" (click)="eliminarCarpeta(carpeta)">
+                  <app-icono nombre="papelera" [tamano]="15" /> Mover a la papelera
+                </button>
+              </div>
+            }
           </div>
         }
       </div>
@@ -83,30 +94,35 @@
           <small><span class="ext">{{ doc.extension }}</span> · {{ doc.tamano | bytes }}</small>
         </button>
         @if (propio()) {
-          <div class="tarjeta-acciones">
+          <div class="tarjeta-acciones" [class.abierta]="menuAbierto() === doc._id">
             <button
               type="button"
-              title="Compartir"
-              [attr.aria-label]="'Compartir ' + doc.nombre + '.' + doc.extension"
-              (click)="
-                compartiendo.set({
-                  tipo: 'documentos',
-                  id: doc._id,
-                  nombre: doc.nombre + '.' + doc.extension,
-                })
-              "
+              class="boton-menu"
+              title="Más acciones"
+              aria-haspopup="menu"
+              [attr.aria-expanded]="menuAbierto() === doc._id"
+              [attr.aria-label]="'Acciones de ' + doc.nombre + '.' + doc.extension"
+              (click)="menuAbierto.set(menuAbierto() === doc._id ? null : doc._id)"
             >
-              <app-icono nombre="compartir" [tamano]="15" />
+              <app-icono nombre="mas" [tamano]="16" />
             </button>
-            <button
-              type="button"
-              class="eliminar"
-              title="Mover a la papelera"
-              [attr.aria-label]="'Mover ' + doc.nombre + '.' + doc.extension + ' a la papelera'"
-              (click)="eliminarDocumento(doc)"
-            >
-              <app-icono nombre="papelera" [tamano]="15" />
-            </button>
+            @if (menuAbierto() === doc._id) {
+              @let seleccion = seleccionDe('documentos', doc);
+              <div class="menu-acciones" role="menu">
+                <button type="button" role="menuitem" (click)="abrirDialogo('renombrar', seleccion)">
+                  <app-icono nombre="editar" [tamano]="15" /> Renombrar
+                </button>
+                <button type="button" role="menuitem" (click)="abrirDialogo('mover', seleccion)">
+                  <app-icono nombre="mover" [tamano]="15" /> Mover
+                </button>
+                <button type="button" role="menuitem" (click)="abrirDialogo('compartir', seleccion)">
+                  <app-icono nombre="compartir" [tamano]="15" /> Compartir
+                </button>
+                <button type="button" role="menuitem" class="eliminar" (click)="eliminarDocumento(doc)">
+                  <app-icono nombre="papelera" [tamano]="15" /> Mover a la papelera
+                </button>
+              </div>
+            }
           </div>
         }
       </div>
@@ -127,7 +143,19 @@
   <app-compartir
     [tipo]="recurso.tipo"
     [recursoId]="recurso.id"
-    [nombre]="recurso.nombre"
+    [nombre]="nombreCompleto(recurso)"
     (cerrar)="compartiendo.set(null)"
   />
+}
+
+@if (renombrando(); as recurso) {
+  <app-renombrar
+    [seleccion]="recurso"
+    (renombrado)="alRenombrar($event)"
+    (cerrar)="renombrando.set(null)"
+  />
+}
+
+@if (moviendo(); as recurso) {
+  <app-mover [seleccion]="recurso" (movido)="alMover(recurso, $event)" (cerrar)="moviendo.set(null)" />
 }

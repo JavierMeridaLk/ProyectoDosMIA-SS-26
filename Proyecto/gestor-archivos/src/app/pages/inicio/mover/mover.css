@@ -1,0 +1,64 @@
+.dialogo-ancho {
+  max-width: 460px;
+}
+
+h2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.indicacion {
+  margin: 0 0 10px;
+  font-size: 0.82rem;
+  color: var(--texto-suave);
+}
+
+.destinos {
+  max-height: 300px;
+  margin: 0 0 14px;
+  padding: 4px;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+}
+
+.destinos button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font-size: 0.85rem;
+  text-align: left;
+  color: var(--navy);
+}
+
+.destinos button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.destinos button:hover:not(:disabled) {
+  background: var(--beige);
+}
+
+.destinos button.elegido {
+  background: var(--sky);
+  font-weight: 600;
+}
+
+/* Destinos no validos: donde ya esta o dentro de si misma */
+.destinos button:disabled {
+  color: #b3bfc9;
+  cursor: not-allowed;
+}
+
+.alerta {
+  margin-bottom: 14px;
+}
