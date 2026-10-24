@@ -9,7 +9,8 @@
   "scripts": {
     "start": "node app.js",
     "dev": "node --watch app.js",
-    "seed:admin": "node scripts/crearAdmin.js"
+    "db:crear": "node scripts/crearBaseDatos.js",
+    "db:cargar": "node scripts/cargaInicial.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
